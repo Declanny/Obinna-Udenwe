@@ -62,14 +62,14 @@ function BooksList() {
       {BOOKS.map((book, i) => (
         <div
           key={book.slug}
-          className="sticky top-0 min-h-screen flex flex-col justify-center bg-cream px-8 lg:px-16 py-16"
+          className="sticky top-0 min-h-screen flex flex-col justify-center bg-cream px-6 md:px-8 lg:px-16 py-14 md:py-16"
         >
           {i === 0 && (
-            <div className="max-w-5xl mx-auto w-full mb-12 lg:mb-16">
-              <h1 className="font-serif text-5xl lg:text-6xl font-bold text-dark-green mb-3">
+            <div className="w-full mb-12 md:mb-20 lg:mb-28">
+              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-dark-green mb-3">
                 Books
               </h1>
-              <p className="font-serif italic text-lg text-dark-green/70">
+              <p className="font-serif italic text-base md:text-lg text-dark-green/70">
                 Novels, novellas, and collections.
               </p>
             </div>

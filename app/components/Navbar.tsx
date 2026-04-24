@@ -45,7 +45,7 @@ export function Navbar() {
 
   return (
     <nav
-      className={`sticky top-0 z-50 transition-all duration-300 text-dark-green ${
+      className={`sticky top-0 z-50 transition-[padding] duration-300 text-dark-green ${
         open
           ? "py-5 md:py-6 bg-white border-b border-dark-green/10"
           : scrolled
@@ -77,7 +77,7 @@ export function Navbar() {
         </div>
 
         <Link
-          href="/#contact"
+          href="/contact"
           className="hidden md:inline-block bg-gold text-white text-xs font-semibold uppercase tracking-widest px-5 py-2.5 rounded-sm hover:bg-gold/90 transition-colors"
         >
           Contact
@@ -134,7 +134,7 @@ export function Navbar() {
             ))}
           </div>
           <Link
-            href="/#contact"
+            href="/contact"
             onClick={() => setOpen(false)}
             className="mt-auto inline-block bg-gold text-white text-xs font-semibold uppercase tracking-widest px-6 py-4 rounded-sm hover:bg-gold/90 transition-colors text-center"
           >

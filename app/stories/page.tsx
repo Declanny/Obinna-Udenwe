@@ -17,6 +17,7 @@ type Story = {
   publication: string;
   year: string;
   prize?: boolean;
+  prizeExcerpt?: string;
 };
 
 const FILTERS: { label: string; value: Filter }[] = [
@@ -34,7 +35,6 @@ const STORIES: Story[] = [
     excerpt: "The complexities of memory and betrayal unfold in a small town…",
     publication: "Gutter Magazine",
     year: "2022",
-    prize: true,
   },
   {
     tag: "Prize-winning",
@@ -43,6 +43,8 @@ const STORIES: Story[] = [
     publication: "Prairie Schooner",
     year: "2021",
     prize: true,
+    prizeExcerpt:
+      "A profound exploration of identity and heritage, recognized for its exceptional narrative depth.",
   },
   {
     tag: "Essay",
@@ -59,6 +61,9 @@ const STORIES: Story[] = [
       "A provocative exploration of the sacred and the profane in modern Lagos…",
     publication: "Munyori Literary Journal",
     year: "2018",
+    prize: true,
+    prizeExcerpt:
+      "A daring series that navigates the intersections of faith, desire, and the human condition.",
   },
   {
     tag: "Prize-winning",
@@ -68,6 +73,8 @@ const STORIES: Story[] = [
     publication: "The Short Story is Dead",
     year: "2015",
     prize: true,
+    prizeExcerpt:
+      "Challenging the boundaries of the form, this piece captured the spirit of contemporary African fiction.",
   },
 ];
 
@@ -148,13 +155,13 @@ function FeaturedAdaptation({ story }: { story: Story }) {
             </blockquote>
             <div className="flex flex-wrap gap-5 md:gap-6 pt-2">
               <Link
-                href="#"
+                href="/stories/it-has-to-do-with-emilia"
                 className="text-xs font-semibold uppercase tracking-widest text-dark-green hover:text-gold transition-colors"
               >
                 Read the Story &rarr;
               </Link>
               <Link
-                href="#"
+                href="/stories/it-has-to-do-with-emilia#film"
                 className="text-xs font-semibold uppercase tracking-widest text-foreground/60 hover:text-gold transition-colors"
               >
                 About the Film &rarr;
@@ -168,23 +175,34 @@ function FeaturedAdaptation({ story }: { story: Story }) {
 }
 
 function PrizeWinningStories() {
-  const prizeStories = STORIES.filter((s) => s.prize).slice(0, 3);
+  const order = [
+    "Prairie Schooner Prize Story",
+    "The Short Story is Dead Prize Story",
+    "Holy Sex (Series)",
+  ];
+  const prizeStories = order
+    .map((t) => STORIES.find((s) => s.title === t))
+    .filter((s): s is Story => Boolean(s));
   if (prizeStories.length === 0) return null;
   return (
     <section className="bg-cream">
-      <div className="px-6 md:px-8 lg:px-16 pb-12 md:pb-16 border-l-2 border-gold pl-5 md:pl-6 lg:pl-10">
-        <p className="text-gold text-xs uppercase tracking-widest font-semibold mb-6 md:mb-8">
-          Prize-winning Stories
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
-          {prizeStories.map((s) => (
-            <div key={s.title} className="space-y-3">
-              <h3 className="font-serif text-xl text-dark-green">{s.title}</h3>
-              <p className="text-sm text-foreground/70 leading-relaxed">
-                {s.excerpt}
-              </p>
-            </div>
-          ))}
+      <div className="px-6 md:px-8 lg:px-16 pb-12 md:pb-16">
+        <div className="border-l-2 border-gold pl-5 md:pl-6 lg:pl-10">
+          <p className="text-gold text-xs uppercase tracking-widest font-semibold mb-8 md:mb-10">
+            Prize-winning Stories
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-14">
+            {prizeStories.map((s) => (
+              <div key={s.title} className="space-y-3">
+                <h3 className="font-serif text-xl md:text-2xl text-dark-green">
+                  {s.title}
+                </h3>
+                <p className="text-sm text-foreground/70 leading-relaxed">
+                  {s.prizeExcerpt ?? s.excerpt}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

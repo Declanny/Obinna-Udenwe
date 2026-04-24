@@ -25,13 +25,13 @@ function HeroSection() {
             Explore Bibliography
           </Link>
         </div>
-        <div className="shrink-0 w-full lg:w-auto flex justify-center lg:block">
+        <div className="shrink-0 w-full lg:w-auto">
           <div
-            className="relative overflow-hidden mx-auto lg:mx-0
-                       w-[280px] h-[326px]
-                       sm:w-[340px] sm:h-[395px]
+            className="relative overflow-hidden
+                       w-full aspect-[430/500]
+                       sm:w-[420px] sm:h-[488px] sm:aspect-auto
                        lg:w-[430px] lg:h-[500px]
-                       rounded-[20px] md:rounded-[24px] lg:rounded-[30px]
+                       rounded-t-[20px] md:rounded-t-[24px] lg:rounded-[30px]
                        border-[6px] md:border-[7px] lg:border-[9px]"
             style={{ borderColor: "#C8922A" }}
           >
@@ -82,46 +82,48 @@ function AwardsTicker() {
 
 function FeaturedBook() {
   return (
-    <section className="bg-cream">
-      <div className="px-6 md:px-8 lg:px-16 pt-14 md:pt-20 pb-0 flex flex-col lg:flex-row items-center justify-center gap-10 md:gap-16 lg:gap-20">
-        <div className="shrink-0 flex justify-center lg:block">
-          <Image
-            src="/book1.png"
-            alt="Years of Shame book cover"
-            width={449}
-            height={573}
-            className="w-[240px] md:w-[300px] lg:w-[350px] h-auto"
-          />
-        </div>
-        <div className="flex-1 space-y-4 md:space-y-5 max-w-full lg:max-w-none">
-          <span className="inline-block text-xs font-semibold uppercase tracking-widest text-gold border border-gold px-3 py-1 rounded-full">
-            New Release 2025
-          </span>
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-dark-green">
-            Years of Shame
-          </h2>
-          <p className="font-serif italic text-base md:text-lg text-dark-green/70">
-            A sweeping saga of legacy and redemption in the heart of the
-            savannah.
-          </p>
-          <p className="text-sm text-foreground/70 leading-relaxed max-w-lg">
-            In his most ambitious work to date, Udenwe weaves a tapestry of
-            political intrigue and personal sacrifice that redefines the modern
-            West African epic.
-          </p>
-          <div className="flex flex-wrap gap-3 md:gap-4 pt-2">
-            <Link
-              href="#"
-              className="bg-dark-green text-white text-xs font-semibold uppercase tracking-widest px-5 md:px-6 py-3 rounded-sm hover:bg-dark-green/90 transition-colors"
-            >
-              Get the Book
-            </Link>
-            <Link
-              href="#"
-              className="border-2 border-dark-green text-dark-green text-xs font-semibold uppercase tracking-widest px-5 md:px-6 py-3 rounded-sm hover:bg-dark-green hover:text-white transition-colors"
-            >
-              Read an Excerpt
-            </Link>
+    <section className="bg-cream sticky top-0 min-h-screen flex items-center">
+      <div className="w-full px-6 md:px-8 lg:px-16 py-14 md:py-16">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-10 md:gap-16 lg:gap-24">
+          <div className="shrink-0 flex justify-center lg:block">
+            <Image
+              src="/book1.png"
+              alt="Years of Shame book cover"
+              width={449}
+              height={573}
+              className="w-[260px] md:w-[340px] lg:w-[440px] h-auto"
+            />
+          </div>
+          <div className="flex-1 space-y-5 md:space-y-6 max-w-full lg:max-w-2xl">
+            <span className="inline-block text-xs md:text-sm font-semibold uppercase tracking-widest text-gold border border-gold px-4 py-1.5 rounded-full">
+              New Release 2025
+            </span>
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-dark-green leading-tight">
+              Years of Shame
+            </h2>
+            <p className="font-serif italic text-lg md:text-xl lg:text-2xl text-dark-green/70 leading-snug">
+              A sweeping saga of legacy and redemption in the heart of the
+              savannah.
+            </p>
+            <p className="text-base md:text-[17px] text-foreground/70 leading-relaxed max-w-xl">
+              In his most ambitious work to date, Udenwe weaves a tapestry of
+              political intrigue and personal sacrifice that redefines the modern
+              West African epic.
+            </p>
+            <div className="flex flex-wrap gap-3 md:gap-4 pt-3">
+              <Link
+                href="#"
+                className="bg-dark-green text-white text-xs md:text-sm font-semibold uppercase tracking-widest px-6 md:px-7 py-3.5 md:py-4 rounded-sm hover:bg-dark-green/90 transition-colors"
+              >
+                Get the Book
+              </Link>
+              <Link
+                href="#"
+                className="border-2 border-dark-green text-dark-green text-xs md:text-sm font-semibold uppercase tracking-widest px-6 md:px-7 py-3.5 md:py-4 rounded-sm hover:bg-dark-green hover:text-white transition-colors"
+              >
+                Read an Excerpt
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -138,8 +140,8 @@ function BooksSection() {
   ];
 
   return (
-    <section id="books" className="bg-cream">
-      <div className="px-6 md:px-8 lg:px-16 pt-14 md:pt-20 pb-0">
+    <section id="books" className="bg-cream sticky top-0 min-h-screen flex items-start lg:items-center">
+      <div className="w-full px-6 md:px-8 lg:px-16 pt-20 md:pt-24 lg:pt-16 pb-10 md:pb-12 lg:pb-16">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 md:mb-10">
           <div>
             <p className="text-gold text-xs uppercase tracking-widest font-semibold mb-2">
@@ -184,7 +186,7 @@ function GallerySection() {
 
   return (
     <section className="bg-cream">
-      <div className="px-6 md:px-8 lg:px-16 pt-14 md:pt-20 pb-0">
+      <div className="px-6 md:px-8 lg:px-16 pt-6 md:pt-8 lg:pt-12 pb-0">
         <p className="text-gold text-xs uppercase tracking-widest font-semibold mb-2">
           Where the Story Began
         </p>
@@ -279,8 +281,10 @@ export default function Home() {
       <Navbar />
       <HeroSection />
       <AwardsTicker />
-      <FeaturedBook />
-      <BooksSection />
+      <div className="relative">
+        <FeaturedBook />
+        <BooksSection />
+      </div>
       <GallerySection />
       <LatestWriting />
       <QuoteAndNewsletter />
