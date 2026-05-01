@@ -4,7 +4,7 @@ import cloudinary.uploader
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.config import settings
+from app.cloudinary_utils import upload_to_cloudinary
 from app.dependencies import get_current_admin, get_db
 from app.models.media import MediaAsset
 from app.schemas.media import MediaAssetOut
@@ -32,24 +32,14 @@ def list_media(db: Session = Depends(get_db)):
 async def upload_media(file: UploadFile = File(...), db: Session = Depends(get_db)):
     import os
     ext = os.path.splitext(file.filename or "")[1].lower()
-    resource_type = _resource_type(ext)
-    content = await file.read()
-
-    result = await asyncio.to_thread(
-        cloudinary.uploader.upload,
-        content,
-        folder=settings.cloudinary_folder,
-        resource_type=resource_type,
-        use_filename=True,
-        unique_filename=True,
-    )
+    result = await upload_to_cloudinary(file)
 
     asset = MediaAsset(
         filename=file.filename or result["original_filename"],
         public_id=result["public_id"],
         url=result["secure_url"],
-        file_type=resource_type,
-        size=result.get("bytes", len(content)),
+        file_type=_resource_type(ext),
+        size=result.get("bytes", 0),
     )
     db.add(asset)
     db.commit()

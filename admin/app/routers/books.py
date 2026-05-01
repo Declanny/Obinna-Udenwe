@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
+from app.cloudinary_utils import upload_to_cloudinary
 from app.dependencies import get_current_admin, get_db
 from app.models.book import Book
-from app.schemas.book import BookCreate, BookOut, BookUpdate
+from app.schemas.book import BookOut
 
 router = APIRouter()
 
@@ -14,8 +17,24 @@ def list_books(db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=BookOut, dependencies=[Depends(get_current_admin)])
-def create_book(payload: BookCreate, db: Session = Depends(get_db)):
-    book = Book(**payload.model_dump())
+async def create_book(
+    title: str = Form(...),
+    year: int = Form(...),
+    tagline: str = Form(""),
+    description: str = Form(""),
+    status: str = Form("draft"),
+    image: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db),
+):
+    image_url = (await upload_to_cloudinary(image))["secure_url"] if image else ""
+    book = Book(
+        title=title,
+        year=year,
+        tagline=tagline,
+        description=description,
+        status=status,
+        image=image_url,
+    )
     db.add(book)
     db.commit()
     db.refresh(book)
@@ -31,12 +50,31 @@ def get_book(book_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{book_id}", response_model=BookOut, dependencies=[Depends(get_current_admin)])
-def update_book(book_id: int, payload: BookUpdate, db: Session = Depends(get_db)):
+async def update_book(
+    book_id: int,
+    title: Optional[str] = Form(None),
+    year: Optional[int] = Form(None),
+    tagline: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    status: Optional[str] = Form(None),
+    image: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db),
+):
     book = db.get(Book, book_id)
     if not book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
-    for field, value in payload.model_dump(exclude_none=True).items():
-        setattr(book, field, value)
+    if image:
+        book.image = (await upload_to_cloudinary(image))["secure_url"]
+    if title is not None:
+        book.title = title
+    if year is not None:
+        book.year = year
+    if tagline is not None:
+        book.tagline = tagline
+    if description is not None:
+        book.description = description
+    if status is not None:
+        book.status = status
     db.commit()
     db.refresh(book)
     return book
