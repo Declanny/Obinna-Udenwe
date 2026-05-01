@@ -16,6 +16,7 @@ type Article = {
   date: string;
   description: string;
   image?: string;
+  href: string;
 };
 
 const ARTICLES: Article[] = [
@@ -26,6 +27,7 @@ const ARTICLES: Article[] = [
     description:
       "In his recent dispatch, Udenwe explores the delicate balance between satirical license and the contemporary pulse of Nigerian governance, marking a pivotal shift in his upcoming anthology.",
     image: "/Obinna Udenwe Portrait.png",
+    href: "/news",
   },
   {
     tag: "Blog",
@@ -33,6 +35,7 @@ const ARTICLES: Article[] = [
     date: "September 5, 2024",
     description:
       "History is often a collection of what was convenient to record. For the Nigerian writer, the archive is not just a place of discovery but a site of excavation and reconstruction of the suppressed voice.",
+    href: "/news/why-i-set-years-of-shame-in-abakaliki",
   },
   {
     tag: "News",
@@ -41,6 +44,7 @@ const ARTICLES: Article[] = [
     description:
       "The judging panel cited The Colors of Hatred as a masterpiece of contemporary African literature during the ceremony in Lagos.",
     image: "/books/IMG_0552 1.png",
+    href: "/news",
   },
   {
     tag: "Blog",
@@ -48,6 +52,7 @@ const ARTICLES: Article[] = [
     date: "August 30, 2024",
     description:
       "Finding the rhythm of prose outside the bustle of Lagos at Mount Sinai.",
+    href: "/news/why-i-set-years-of-shame-in-abakaliki",
   },
   {
     tag: "Blog",
@@ -55,6 +60,7 @@ const ARTICLES: Article[] = [
     date: "July 22, 2024",
     description:
       "Rereading Arrow of God in the 21st century and finding new echoes of power and age.",
+    href: "/news/why-i-set-years-of-shame-in-abakaliki",
   },
   {
     tag: "Blog",
@@ -62,6 +68,7 @@ const ARTICLES: Article[] = [
     date: "August 10, 2024",
     description:
       "Join Obinna for an intensive 5-day digital masterclass on crafting political thrillers.",
+    href: "/news/why-i-set-years-of-shame-in-abakaliki",
   },
 ];
 
@@ -99,7 +106,7 @@ function Tabs({
 function FeaturedCard({ article }: { article: Article }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch rounded-sm overflow-hidden">
-      <div className="relative w-full aspect-[4/3] lg:aspect-auto bg-dark-green/10">
+      <div className="relative w-full aspect-4/3 lg:aspect-auto bg-dark-green/10">
         {article.image ? (
           <Image
             src={article.image}
@@ -123,7 +130,7 @@ function FeaturedCard({ article }: { article: Article }) {
           {article.description}
         </p>
         <Link
-          href="#"
+          href={article.href}
           className="text-xs font-semibold uppercase tracking-widest text-gold hover:text-white transition-colors"
         >
           Read the Full Story &rarr;
@@ -149,7 +156,7 @@ function ArticleCard({ article }: { article: Article }) {
         {article.description}
       </p>
       <Link
-        href="#"
+        href={article.href}
         className="inline-block text-xs font-semibold uppercase tracking-widest text-dark-green hover:text-gold transition-colors pt-1"
       >
         Read More &rarr;

@@ -15,6 +15,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const [trackedPath, setTrackedPath] = useState(pathname);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -23,10 +24,10 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close the menu on route change
-  useEffect(() => {
+  if (trackedPath !== pathname) {
+    setTrackedPath(pathname);
     setOpen(false);
-  }, [pathname]);
+  }
 
   // Lock body scroll when menu is open
   useEffect(() => {

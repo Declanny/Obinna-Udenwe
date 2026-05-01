@@ -18,6 +18,13 @@ export function Footer() {
           <Link href="#" className="hover:text-gold transition-colors">
             Contact
           </Link>
+          <Link
+            href="/admin/login"
+            aria-label="Admin login"
+            className="opacity-25 hover:opacity-100 transition-opacity text-[10px]"
+          >
+            •
+          </Link>
         </div>
       </div>
     </footer>
