@@ -3,26 +3,58 @@ import Link from "next/link";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { QuoteAndNewsletter } from "./components/QuoteAndNewsletter";
+import {
+  Blog,
+  Book,
+  GalleryItemApi,
+  SiteContent,
+  blogsApi,
+  booksApi,
+  galleryApi,
+  siteContentApi,
+  slugify,
+} from "./lib/api";
 
-function HeroSection() {
+async function loadData() {
+  const [siteRes, booksRes, blogsRes, galleryRes] = await Promise.allSettled([
+    siteContentApi.get(),
+    booksApi.list(),
+    blogsApi.list(),
+    galleryApi.list(),
+  ]);
+  return {
+    site: siteRes.status === "fulfilled" ? siteRes.value : null,
+    books: booksRes.status === "fulfilled" ? booksRes.value : [],
+    blogs: blogsRes.status === "fulfilled" ? blogsRes.value : [],
+    gallery: galleryRes.status === "fulfilled" ? galleryRes.value : [],
+  };
+}
+
+function HeroSection({ site }: { site: SiteContent | null }) {
+  const kicker = site?.hero_kicker ?? "Novelist. Story-teller. Civil engineer.";
+  const title = site?.hero_title ?? "Obinna Udenwe";
+  const subtitle = site?.hero_subtitle ?? "Award-winning Nigerian author of power, faith, and consequence.";
+  const cta = site?.hero_cta_label ?? "Explore Bibliography";
+  const heroImg = site?.hero_image || "/obinna.jpg";
+
   return (
     <section className="bg-dark-green text-white">
       <div className="px-6 md:px-8 lg:px-16 py-12 md:py-16 lg:py-24 flex flex-col lg:flex-row items-center gap-10 md:gap-12 lg:gap-8">
         <div className="flex-1 space-y-3">
           <p className="font-sans text-base md:text-lg leading-7 md:leading-9 text-[#FFCA64] mt-2 md:mt-6">
-            Novelist. Story-teller. Civil engineer.
+            {kicker}
           </p>
           <h1 className="font-serif text-4xl md:text-5xl lg:text-7xl font-bold leading-tight">
-            Obinna Udenwe
+            {title}
           </h1>
           <p className="text-sm md:text-base text-white/80 max-w-md leading-relaxed">
-            Award-winning Nigerian author of power, faith, and consequence.
+            {subtitle}
           </p>
           <Link
             href="#books"
             className="inline-block bg-gold text-white text-xs font-semibold uppercase tracking-widest px-6 py-3 rounded-sm hover:bg-gold/90 transition-colors mt-2"
           >
-            Explore Bibliography
+            {cta}
           </Link>
         </div>
         <div className="shrink-0 w-full lg:w-auto">
@@ -36,11 +68,12 @@ function HeroSection() {
             style={{ borderColor: "#C8922A" }}
           >
             <Image
-              src="/obinna.jpg"
-              alt="Obinna Udenwe"
+              src={heroImg}
+              alt={title}
               fill
               className="object-cover"
               priority
+              unoptimized
             />
           </div>
         </div>
@@ -49,14 +82,8 @@ function HeroSection() {
   );
 }
 
-function AwardsTicker() {
-  const awards = [
-    "Chinua Achebe Prize 2021",
-    "ANA Prize 2019",
-    "Prairie Schooner Prize 2020",
-    "NLNG Finalist",
-  ];
-
+function AwardsTicker({ awards }: { awards: string[] }) {
+  if (awards.length === 0) return null;
   return (
     <div
       className="bg-white"
@@ -80,45 +107,48 @@ function AwardsTicker() {
   );
 }
 
-function FeaturedBook() {
+function FeaturedBook({ site }: { site: SiteContent | null }) {
+  if (!site) return null;
   return (
     <section className="bg-cream sticky top-0 min-h-screen flex items-center">
       <div className="w-full px-6 md:px-8 lg:px-16 py-14 md:py-16">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-10 md:gap-16 lg:gap-24">
           <div className="shrink-0 flex justify-center lg:block">
-            <Image
-              src="/book1.png"
-              alt="Years of Shame book cover"
-              width={449}
-              height={573}
-              className="w-[260px] md:w-[340px] lg:w-[440px] h-auto"
-            />
+            {site.featured_image ? (
+              <Image
+                src={site.featured_image}
+                alt={`${site.featured_title} book cover`}
+                width={449}
+                height={573}
+                className="w-[260px] md:w-[340px] lg:w-[440px] h-auto"
+                unoptimized
+              />
+            ) : null}
           </div>
           <div className="flex-1 space-y-5 md:space-y-6 max-w-full lg:max-w-2xl">
-            <span className="inline-block text-xs md:text-sm font-semibold uppercase tracking-widest text-gold border border-gold px-4 py-1.5 rounded-full">
-              New Release 2025
-            </span>
+            {site.featured_kicker ? (
+              <span className="inline-block text-xs md:text-sm font-semibold uppercase tracking-widest text-gold border border-gold px-4 py-1.5 rounded-full">
+                {site.featured_kicker}
+              </span>
+            ) : null}
             <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-dark-green leading-tight">
-              Years of Shame
+              {site.featured_title}
             </h2>
             <p className="font-serif italic text-lg md:text-xl lg:text-2xl text-dark-green/70 leading-snug">
-              A sweeping saga of legacy and redemption in the heart of the
-              savannah.
+              {site.featured_tagline}
             </p>
             <p className="text-base md:text-[17px] text-foreground/70 leading-relaxed max-w-xl">
-              In his most ambitious work to date, Udenwe weaves a tapestry of
-              political intrigue and personal sacrifice that redefines the modern
-              West African epic.
+              {site.featured_description}
             </p>
             <div className="flex flex-wrap gap-3 md:gap-4 pt-3">
               <Link
-                href="#"
+                href="/books"
                 className="bg-dark-green text-white text-xs md:text-sm font-semibold uppercase tracking-widest px-6 md:px-7 py-3.5 md:py-4 rounded-sm hover:bg-dark-green/90 transition-colors"
               >
                 Get the Book
               </Link>
               <Link
-                href="#"
+                href="/books"
                 className="border-2 border-dark-green text-dark-green text-xs md:text-sm font-semibold uppercase tracking-widest px-6 md:px-7 py-3.5 md:py-4 rounded-sm hover:bg-dark-green hover:text-white transition-colors"
               >
                 Read an Excerpt
@@ -131,14 +161,9 @@ function FeaturedBook() {
   );
 }
 
-function BooksSection() {
-  const books = [
-    { title: "Years of Shame", cover: "/books/Group 1 (1).png" },
-    { title: "Satans and Shaitans", cover: "/books/Frame 15 (1).png" },
-    { title: "Colours of Hatred", cover: "/books/Group 5 (1).png" },
-    { title: "Satans & Shaitans (2nd Ed.)", cover: "/books/Group 4 (1).png" },
-  ];
-
+function BooksSection({ books }: { books: Book[] }) {
+  const published = books.filter((b) => b.status === "published").slice(0, 4);
+  if (published.length === 0) return null;
   return (
     <section id="books" className="bg-cream sticky top-0 min-h-screen flex items-start lg:items-center">
       <div className="w-full px-6 md:px-8 lg:px-16 pt-20 md:pt-24 lg:pt-16 pb-10 md:pb-12 lg:pb-16">
@@ -152,22 +177,27 @@ function BooksSection() {
             </h2>
           </div>
           <Link
-            href="#"
+            href="/books"
             className="text-xs font-semibold uppercase tracking-widest text-dark-green hover:text-gold transition-colors"
           >
             View Archive →
           </Link>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {books.map((book) => (
-            <Link href="#" key={book.title} className="group block">
-              <Image
-                src={book.cover}
-                alt={book.title}
-                width={400}
-                height={520}
-                className="w-full h-auto group-hover:scale-105 transition-transform duration-300"
-              />
+          {published.map((book) => (
+            <Link href={`/books/${slugify(book.title)}`} key={book.id} className="group block">
+              {book.image ? (
+                <Image
+                  src={book.image}
+                  alt={book.title}
+                  width={400}
+                  height={520}
+                  className="w-full h-auto group-hover:scale-105 transition-transform duration-300"
+                  unoptimized
+                />
+              ) : (
+                <div className="aspect-[4/5] bg-dark-green/10 rounded-sm" />
+              )}
             </Link>
           ))}
         </div>
@@ -176,14 +206,9 @@ function BooksSection() {
   );
 }
 
-function GallerySection() {
-  const photos = [
-    "/books/IMG_0552 1.png",
-    "/books/IMG_0294 1.png",
-    "/books/IMG_3219 1.png",
-    "/books/IMG_3219 1 (1).png",
-  ];
-
+function GallerySection({ gallery }: { gallery: GalleryItemApi[] }) {
+  const photos = gallery.slice(0, 4);
+  if (photos.length === 0) return null;
   return (
     <section className="bg-cream">
       <div className="px-6 md:px-8 lg:px-16 pt-6 md:pt-8 lg:pt-12 pb-0">
@@ -194,17 +219,20 @@ function GallerySection() {
           Literary and atmospheric
         </h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          {photos.map((photo, i) => (
+          {photos.map((photo) => (
             <div
-              key={i}
+              key={photo.id}
               className="aspect-4/3 relative overflow-hidden rounded-sm bg-dark-green/10"
             >
-              <Image
-                src={photo}
-                alt={`Gallery photo ${i + 1}`}
-                fill
-                className="object-cover"
-              />
+              {photo.image ? (
+                <Image
+                  src={photo.image}
+                  alt={photo.title}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              ) : null}
             </div>
           ))}
         </div>
@@ -213,25 +241,9 @@ function GallerySection() {
   );
 }
 
-function LatestWriting() {
-  const articles = [
-    {
-      category: "Short Fiction",
-      title: "The Shadows of Enugu: A Tale of Two Souls",
-      link: "#",
-    },
-    {
-      category: "Essay",
-      title: "The Architecture of Memory in Contemporary Fiction",
-      link: "#",
-    },
-    {
-      category: "Essay",
-      title: "On Faith, Power, and the Responsibility of the Author",
-      link: "#",
-    },
-  ];
-
+function LatestWriting({ blogs }: { blogs: Blog[] }) {
+  const articles = blogs.filter((b) => b.status === "published").slice(0, 3);
+  if (articles.length === 0) return null;
   return (
     <section id="blog" className="bg-cream">
       <div className="px-6 md:px-8 lg:px-16 py-14 md:py-20">
@@ -245,7 +257,7 @@ function LatestWriting() {
             </h2>
           </div>
           <Link
-            href="#"
+            href="/news"
             className="text-xs font-semibold uppercase tracking-widest text-dark-green hover:text-gold transition-colors"
           >
             View All →
@@ -254,12 +266,12 @@ function LatestWriting() {
         <div className="grid md:grid-cols-3 gap-5 md:gap-6">
           {articles.map((article) => (
             <Link
-              href={article.link}
-              key={article.title}
+              href={`/news/${slugify(article.title)}`}
+              key={article.id}
               className="group bg-white p-6 rounded-sm border border-foreground/10 hover:shadow-md transition-shadow"
             >
               <p className="text-xs uppercase tracking-widest text-foreground/50 mb-3">
-                {article.category}
+                {article.category === "news" ? "News" : "Blog"}
               </p>
               <h3 className="font-serif text-xl font-semibold text-dark-green mb-8 group-hover:text-gold transition-colors">
                 {article.title}
@@ -275,18 +287,19 @@ function LatestWriting() {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const { site, books, blogs, gallery } = await loadData();
   return (
     <>
       <Navbar />
-      <HeroSection />
-      <AwardsTicker />
+      <HeroSection site={site} />
+      <AwardsTicker awards={site?.awards ?? []} />
       <div className="relative">
-        <FeaturedBook />
-        <BooksSection />
+        <FeaturedBook site={site} />
+        <BooksSection books={books} />
       </div>
-      <GallerySection />
-      <LatestWriting />
+      <GallerySection gallery={gallery} />
+      <LatestWriting blogs={blogs} />
       <QuoteAndNewsletter />
       <Footer />
     </>

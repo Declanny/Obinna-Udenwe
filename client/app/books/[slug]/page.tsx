@@ -4,131 +4,76 @@ import { notFound } from "next/navigation";
 import { Navbar } from "../../components/Navbar";
 import { Footer } from "../../components/Footer";
 import { QuoteAndNewsletter } from "../../components/QuoteAndNewsletter";
-import { BOOKS, getBook, getOtherBooks, type BookDetail } from "../booksData";
+import { Book, booksApi, slugify } from "../../lib/api";
 
-export function generateStaticParams() {
-  return BOOKS.map((b) => ({ slug: b.slug }));
+async function loadBooks(): Promise<Book[]> {
+  try {
+    return await booksApi.list();
+  } catch {
+    return [];
+  }
 }
 
-function BookHero({ book }: { book: BookDetail }) {
+export async function generateStaticParams() {
+  const books = await loadBooks();
+  return books
+    .filter((b) => b.status === "published")
+    .map((b) => ({ slug: slugify(b.title) }));
+}
+
+function BookHero({ book }: { book: Book }) {
   return (
     <section className="bg-cream">
       <div className="px-8 lg:px-16 pt-16 pb-20 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         <div className="relative overflow-hidden rounded-sm p-10 lg:p-16 flex items-center justify-center min-h-[560px]">
-          <Image
-            src={book.cover}
-            alt=""
-            fill
-            aria-hidden
-            className="object-cover scale-125 blur-2xl"
-          />
-          <div className="absolute inset-0 bg-black/30" />
-          <Image
-            src={book.cover}
-            alt={`${book.title} book cover`}
-            width={400}
-            height={560}
-            className="relative z-10 w-full max-w-[380px] h-auto drop-shadow-2xl"
-            priority
-          />
+          {book.image ? (
+            <>
+              <Image
+                src={book.image}
+                alt=""
+                fill
+                aria-hidden
+                className="object-cover scale-125 blur-2xl"
+                unoptimized
+              />
+              <div className="absolute inset-0 bg-black/30" />
+              <Image
+                src={book.image}
+                alt={`${book.title} book cover`}
+                width={400}
+                height={560}
+                className="relative z-10 w-full max-w-[380px] h-auto drop-shadow-2xl"
+                priority
+                unoptimized
+              />
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-dark-green/10" />
+          )}
         </div>
         <div className="space-y-6">
           <p className="text-gold text-xs uppercase tracking-widest font-semibold">
-            {book.heroLabel}
+            Published {book.year}
           </p>
           <h1 className="font-serif text-5xl lg:text-6xl font-bold text-dark-green tracking-tight">
-            SYNOPSIS
+            {book.title}
           </h1>
-          <p className="font-serif italic text-lg text-dark-green/70">
-            {book.genre}
-          </p>
-          <p className="font-sans text-[18px] leading-[39px] text-foreground/80 max-w-xl">
-            {book.synopsis}
-          </p>
+          {book.tagline ? (
+            <p className="font-serif italic text-lg text-dark-green/70">
+              {book.tagline}
+            </p>
+          ) : null}
+          {book.description ? (
+            <p className="font-sans text-[18px] leading-[39px] text-foreground/80 max-w-xl">
+              {book.description}
+            </p>
+          ) : null}
           <Link
             href="#"
             className="inline-block bg-dark-green text-white text-xs font-semibold uppercase tracking-widest px-8 py-4 rounded-sm hover:bg-dark-green/90 transition-colors mt-2"
           >
             Get the Book
           </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function MilestonesSection({ book }: { book: BookDetail }) {
-  return (
-    <section className="bg-cream">
-      <div className="px-8 lg:px-16 pb-16">
-        <p className="text-gold text-xs uppercase tracking-widest font-semibold mb-8">
-          Milestones &amp; Recognition
-        </p>
-        <div className="max-w-3xl divide-y divide-dark-green/10">
-          {book.milestones.map((m, i) => (
-            <div key={i} className="flex gap-10 py-5">
-              <span className="font-serif text-lg text-dark-green/80 w-16 shrink-0">
-                {m.year}
-              </span>
-              <p className="text-sm text-foreground/70 leading-relaxed">
-                {m.text}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function AuthorQuote({ quote }: { quote: string }) {
-  return (
-    <section className="bg-cream">
-      <div className="px-8 lg:px-16 pb-20">
-        <div className="bg-[#F0EADD] rounded-sm p-10 lg:p-16 flex flex-col lg:flex-row items-start gap-10">
-          <div className="shrink-0 flex flex-col items-center gap-3">
-            <div className="relative w-20 h-20 rounded-full overflow-hidden">
-              <Image
-                src="/obinna.jpg"
-                alt="Obinna Udenwe"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <p className="text-xs uppercase tracking-widest text-dark-green/70">
-              Obinna Udenwe
-            </p>
-          </div>
-          <blockquote className="flex-1 font-serif italic text-xl lg:text-2xl text-dark-green leading-relaxed">
-            &ldquo;{quote}&rdquo;
-          </blockquote>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function LaunchSection({ photos }: { photos: string[] }) {
-  return (
-    <section className="bg-cream">
-      <div className="px-8 lg:px-16 pb-20">
-        <h2 className="font-serif text-3xl lg:text-4xl font-bold text-dark-green text-center mb-10 tracking-tight">
-          THE LAUNCH
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {photos.map((src, i) => (
-            <div
-              key={i}
-              className="relative aspect-[4/3] rounded-sm overflow-hidden"
-            >
-              <Image
-                src={src}
-                alt={`Launch photo ${i + 1}`}
-                fill
-                className="object-cover"
-              />
-            </div>
-          ))}
         </div>
       </div>
     </section>
@@ -170,8 +115,8 @@ function GetYourCopy() {
   );
 }
 
-function MoreFromAuthor({ slug }: { slug: string }) {
-  const others = getOtherBooks(slug);
+function MoreFromAuthor({ others }: { others: Book[] }) {
+  if (others.length === 0) return null;
   return (
     <section className="bg-cream">
       <div className="px-8 lg:px-16 py-20">
@@ -188,17 +133,22 @@ function MoreFromAuthor({ slug }: { slug: string }) {
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           {others.map((b) => (
-            <Link href={`/books/${b.slug}`} key={b.slug} className="group block">
-              <Image
-                src={b.cover}
-                alt={b.title}
-                width={400}
-                height={520}
-                className="w-full h-auto mb-4 group-hover:scale-[1.02] transition-transform duration-300"
-              />
+            <Link href={`/books/${slugify(b.title)}`} key={b.id} className="group block">
+              {b.image ? (
+                <Image
+                  src={b.image}
+                  alt={b.title}
+                  width={400}
+                  height={520}
+                  className="w-full h-auto mb-4 group-hover:scale-[1.02] transition-transform duration-300"
+                  unoptimized
+                />
+              ) : (
+                <div className="aspect-[4/5] bg-dark-green/10 rounded-sm mb-4" />
+              )}
               <p className="font-serif text-lg text-dark-green">{b.title}</p>
               <p className="text-xs uppercase tracking-widest text-foreground/50 mt-1">
-                {b.heroLabel}
+                {b.year}
               </p>
             </Link>
           ))}
@@ -214,18 +164,20 @@ export default async function BookDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const book = getBook(slug);
+  const books = await loadBooks();
+  const book = books.find((b) => slugify(b.title) === slug && b.status === "published");
   if (!book) notFound();
+
+  const others = books.filter(
+    (b) => b.id !== book.id && b.status === "published"
+  );
 
   return (
     <>
       <Navbar />
       <BookHero book={book} />
-      <MilestonesSection book={book} />
-      <AuthorQuote quote={book.quote} />
-      <LaunchSection photos={book.launchPhotos} />
       <GetYourCopy />
-      <MoreFromAuthor slug={book.slug} />
+      <MoreFromAuthor others={others} />
       <QuoteAndNewsletter />
       <Footer />
     </>

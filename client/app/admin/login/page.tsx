@@ -5,31 +5,31 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Navbar } from "../../components/Navbar";
 import { Footer } from "../../components/Footer";
-
-const ADMIN_USER = "admin";
-const ADMIN_PASS = "obinna2026";
-const ADMIN_AUTH_KEY = "obinna_admin_auth";
+import { getToken, login } from "../../lib/api";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const isAuthed = window.localStorage.getItem(ADMIN_AUTH_KEY) === "1";
-    if (isAuthed) router.replace("/admin");
+    if (getToken()) router.replace("/admin");
   }, [router]);
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
-      window.localStorage.setItem(ADMIN_AUTH_KEY, "1");
+    setError("");
+    setSubmitting(true);
+    try {
+      await login(username, password);
       router.push("/admin");
-      return;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid login details.");
+    } finally {
+      setSubmitting(false);
     }
-    setError("Invalid login details.");
   }
 
   return (
@@ -75,9 +75,10 @@ export default function AdminLoginPage() {
               {error ? <p className="text-xs text-rose-700">{error}</p> : null}
               <button
                 type="submit"
-                className="w-full bg-dark-green text-white text-xs uppercase tracking-widest font-semibold px-4 py-3 rounded-sm hover:bg-dark-green/90 transition-colors"
+                disabled={submitting}
+                className="w-full bg-dark-green text-white text-xs uppercase tracking-widest font-semibold px-4 py-3 rounded-sm hover:bg-dark-green/90 transition-colors disabled:opacity-60"
               >
-                Login
+                {submitting ? "Signing in…" : "Login"}
               </button>
             </form>
 
