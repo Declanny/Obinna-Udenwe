@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.cloudinary_config import init_cloudinary
 from app.database import Base, engine
-from app.routers import auth, blogs, books, gallery, media, site_content, stories
+from app.routers import auth, blogs, books, contact, gallery, media, site_content, stories
 
 
 @asynccontextmanager
@@ -41,6 +41,7 @@ app.include_router(stories.router,      prefix=f"{PREFIX}/stories",      tags=["
 app.include_router(gallery.router,      prefix=f"{PREFIX}/gallery",      tags=["gallery"])
 app.include_router(media.router,        prefix=f"{PREFIX}/media",        tags=["media"])
 app.include_router(site_content.router, prefix=f"{PREFIX}/site-content", tags=["site-content"])
+app.include_router(contact.router,      prefix=f"{PREFIX}/contact",      tags=["contact"])
 
 
 @app.get("/")
