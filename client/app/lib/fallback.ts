@@ -1,0 +1,264 @@
+// Original-design content used as fallback when the backend returns nothing.
+// Keep entries shaped exactly like the API types so pages can swap in/out without branching.
+
+import {
+  Blog,
+  Book,
+  GalleryItemApi,
+  SiteContent,
+  Story,
+} from "./api";
+
+export const FALLBACK_SITE: SiteContent = {
+  id: 0,
+  hero_kicker: "Novelist. Story-teller. Civil engineer.",
+  hero_title: "Obinna Udenwe",
+  hero_subtitle:
+    "Award-winning Nigerian author of power, faith, and consequence.",
+  hero_cta_label: "Explore Bibliography",
+  hero_image: "/obinna.jpg",
+  awards: [
+    "Chinua Achebe Prize 2021",
+    "ANA Prize 2019",
+    "Prairie Schooner Prize 2020",
+    "NLNG Finalist",
+  ],
+  featured_kicker: "New Release 2025",
+  featured_title: "Years of Shame",
+  featured_tagline:
+    "A sweeping saga of legacy and redemption in the heart of the savannah.",
+  featured_description:
+    "In his most ambitious work to date, Udenwe weaves a tapestry of political intrigue and personal sacrifice that redefines the modern West African epic.",
+  featured_image: "/book1.png",
+  newsletter_headline: "",
+  newsletter_body: "",
+  contact_email: "hello@obinnaudenwe.com",
+  updated_at: "",
+};
+
+export const FALLBACK_GALLERY: GalleryItemApi[] = [
+  {
+    id: -1,
+    title: "Gallery photo 1",
+    image: "/books/IMG_0552 1.png",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -2,
+    title: "Gallery photo 2",
+    image: "/books/IMG_0294 1.png",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -3,
+    title: "Gallery photo 3",
+    image: "/books/IMG_3219 1.png",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -4,
+    title: "Gallery photo 4",
+    image: "/books/IMG_3219 1 (1).png",
+    created_at: "",
+    updated_at: "",
+  },
+];
+
+export const FALLBACK_BOOKS: Book[] = [
+  {
+    id: -1,
+    title: "Years of Shame",
+    year: 2025,
+    image: "/bookpageimages/WhatsApp Image 2026-03-22 at 14.10.51 1 (3).png",
+    tagline:
+      "A sweeping saga of legacy and redemption in the heart of the savannah.",
+    description:
+      "Set in southern Nigeria, Years of Shame tells the haunting tale of Patrice Nebe, a man whose defiance and misplaced pride lead him to take the oath of Oji — a feared ritual with a toll of wealth and children. The novel unravels the devastating ripple effects of this decision; spanning generations and culminating in a heart-wrenching reckoning for his descendants.",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -2,
+    title: "Satans and Shaitans",
+    year: 2024,
+    image: "/bookpageimages/WhatsApp Image 2026-03-22 at 14.10.51 1.png",
+    tagline: "Reissued for the anniversary edition.",
+    description:
+      "A decade after its original publication, Jacaranda presents the anniversary edition of Satans & Shaitans with a new introduction by the author. Five secret cartels, bound by ancient oaths and modern ambitions, plot against the Nigerian President.",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -3,
+    title: "Colours of Hatred",
+    year: 2021,
+    image: "/bookpageimages/WhatsApp Image 2026-03-22 at 14.10.51 1 (2).png",
+    tagline: "A gripping tale of love, loss, and the price of ambition.",
+    description:
+      "Colours of Hatred follows a love that tries to hold its shape inside the hard machinery of Nigerian politics. Udenwe draws two unforgettable protagonists into a slow-burning storm of ambition, family loyalty, and violence. Winner of the inaugural Chinua Achebe Prize for Literature.",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -4,
+    title: "Satans & Shaitans (2nd Ed.)",
+    year: 2015,
+    image: "/bookpageimages/WhatsApp Image 2026-03-22 at 14.10.51 1 (1).png",
+    tagline: "A thriller set against Nigeria's terrorism tension.",
+    description:
+      "Satans & Shaitans is an explosive debut set against the backdrop of Nigeria's terrorism tension. Five shadowy cartels, bound by blood pacts and hungry for control, unleash a chain of assassinations that reach into the highest offices of the land. Winner of the ANA Prize for Prose Fiction.",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+];
+
+export const FALLBACK_BLOGS: Blog[] = [
+  {
+    id: -1,
+    title: "The Satirist's Burden: A New Chapter in Nigerian Political Fiction",
+    category: "news",
+    published_on: "October 12, 2024",
+    excerpt:
+      "In his recent dispatch, Udenwe explores the delicate balance between satirical license and the contemporary pulse of Nigerian governance, marking a pivotal shift in his upcoming anthology.",
+    body: "In his recent dispatch, Udenwe explores the delicate balance between satirical license and the contemporary pulse of Nigerian governance. Across two essays and a forthcoming novella, the writer maps a pivotal shift in his thinking about humor as a political instrument — and the costs of wielding it from inside the country he writes about.",
+    cover: "/Obinna Udenwe Portrait.png",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -2,
+    title: "The Silence of the Archives: Why We Must Write What We Forget",
+    category: "blog",
+    published_on: "September 5, 2024",
+    excerpt:
+      "History is often a collection of what was convenient to record. For the Nigerian writer, the archive is not just a place of discovery but a site of excavation and reconstruction of the suppressed voice.",
+    body: "History is often a collection of what was convenient to record. For the Nigerian writer, the archive is not just a place of discovery but a site of excavation — the reconstruction of voices the official record never wanted preserved. The essay traces how Udenwe's recent fiction has drawn from oral histories, court ledgers, and family letters to surface what was meant to disappear.",
+    cover: "",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -3,
+    title: "Obinna Udenwe Wins the Prestigious Heritage Lit Prize",
+    category: "news",
+    published_on: "August 30, 2024",
+    excerpt:
+      "The judging panel cited The Colors of Hatred as a masterpiece of contemporary African literature during the ceremony in Lagos.",
+    body: "The judging panel cited Colours of Hatred as a masterpiece of contemporary African literature during the ceremony in Lagos. The prize, awarded annually to a single work that 'reshapes the imaginative terrain of the continent,' comes a year after the novel was shortlisted for the NLNG Nigeria Prize for Literature.",
+    cover: "/books/IMG_0552 1.png",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -4,
+    title: "Morning Tea in Abakaliki",
+    category: "blog",
+    published_on: "August 30, 2024",
+    excerpt:
+      "Finding the rhythm of prose outside the bustle of Lagos at Mount Sinai.",
+    body: "Finding the rhythm of prose outside the bustle of Lagos at Mount Sinai — a short reflection on writing routines, light, and the kind of quiet that only comes before a city wakes.",
+    cover: "",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -5,
+    title: "Reflections on Chinua Achebe",
+    category: "blog",
+    published_on: "July 22, 2024",
+    excerpt:
+      "Rereading Arrow of God in the 21st century and finding new echoes of power and age.",
+    body: "Rereading Arrow of God in the twenty-first century, the novel's quiet meditations on power and age land with new force. This piece is part personal recollection, part close reading, and part argument for why each generation of Nigerian writers must encounter Achebe on their own terms.",
+    cover: "",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -6,
+    title: "Upcoming Workshop: The Art of Suspense",
+    category: "blog",
+    published_on: "August 10, 2024",
+    excerpt:
+      "Join Obinna for an intensive 5-day digital masterclass on crafting political thrillers.",
+    body: "Join Obinna for an intensive 5-day digital masterclass on crafting political thrillers. The workshop covers pacing, the architecture of conspiracy, and the discipline of writing menace without resorting to spectacle.",
+    cover: "",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+];
+
+export const FALLBACK_STORIES: Story[] = [
+  {
+    id: -1,
+    title: "It Has to Do with Emilia",
+    read_time: "8 Min",
+    excerpt:
+      "The complexities of memory and betrayal unfold in a small town — adapted into a film in 2022 by Bump Films, South Africa.",
+    body: "I remember the way the heat clung to the corridors of the Enugu library, a thick, stagnant air that tasted of dust and old bindings. Emilia sat three tables away, her presence a quiet weight on the room.\n\nWeeks passed before we spoke. The rain had finally broken the heat, a sudden tropical downpour that turned the red earth into a slick, treacherous canvas. We stood under the concrete overhang of the library entrance, watching the world turn grey. She asked for a light, though she had no cigarette. It was an opening, a bridge built of thin air and shared proximity.",
+    cover: "/Cinematic frame.png",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -2,
+    title: "Prairie Schooner Prize Story",
+    read_time: "12 Min",
+    excerpt:
+      "An odyssey of spirits and shadows across the Nigerian landscape — winner of the Prairie Schooner — Glenna Luschei Prize, 2020.",
+    body: "An odyssey of spirits and shadows across the Nigerian landscape. A profound exploration of identity and heritage, recognized for its exceptional narrative depth.",
+    cover: "",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -3,
+    title: "Crossover Mexico-Nigeria Stories",
+    read_time: "10 Min",
+    excerpt:
+      "Reflections on the cultural bridges between two disparate yet connected worlds.",
+    body: "Reflections on the cultural bridges between two disparate yet connected worlds. Produced in partnership with Nora Vasconselos as part of the Crossover Mexico–Nigeria project.",
+    cover: "",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -4,
+    title: "Holy Sex (Series)",
+    read_time: "15 Min",
+    excerpt:
+      "A provocative exploration of the sacred and the profane in modern Lagos.",
+    body: "A provocative exploration of the sacred and the profane in modern Lagos. A daring series that navigates the intersections of faith, desire, and the human condition. Originally serialized on Brittle Paper from 2014.",
+    cover: "",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: -5,
+    title: "The Short Story is Dead Prize Story",
+    read_time: "9 Min",
+    excerpt:
+      "The final moments of a dying tradition told through multiple perspectives — winner of the Short Story is Dead Prize, 2015.",
+    body: "The final moments of a dying tradition told through multiple perspectives. Challenging the boundaries of the form, this piece captured the spirit of contemporary African fiction.",
+    cover: "",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+  },
+];
