@@ -12,5 +12,5 @@ dependencies = [
     "bcrypt",
     "python-multipart",
     "cloudinary",
-    "aiosmtplib",
+    "resend",
 ]
