@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import datetime, timedelta
 
@@ -9,6 +10,8 @@ from app.config import settings
 from app.email_utils import send_otp_email
 from app.otp_store import store_otp, validate_otp
 from app.schemas.auth import LoginRequest, OTPSentResponse, TokenResponse, VerifyOTPRequest
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -38,10 +41,11 @@ async def login(payload: LoginRequest) -> OTPSentResponse:
     code = store_otp(payload.username)
     try:
         await send_otp_email(code)
-    except Exception:
+    except Exception as exc:
+        logger.exception("SMTP error sending OTP to %s: %s", settings.admin_email, exc)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Failed to send verification email. Check SMTP configuration.",
+            detail=f"Failed to send verification email: {exc}",
         )
     return OTPSentResponse()
 
