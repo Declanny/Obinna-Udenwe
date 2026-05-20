@@ -15,7 +15,10 @@ async def submit_contact(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    submission = ContactSubmission(**payload.model_dump())
+    data = payload.model_dump()
+    data["organization"] = data["organization"] or ""
+    data["schedule"] = data["schedule"] or ""
+    submission = ContactSubmission(**data)
     db.add(submission)
     db.commit()
     db.refresh(submission)

@@ -1,12 +1,13 @@
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from typing import Optional
 
 import aiosmtplib
 
 from app.config import settings
 
 
-async def send_contact_notification(name: str, email: str, subject: str, message: str, inquiry_type: str, organization: str | None, schedule: str | None) -> None:
+async def send_contact_notification(name: str, email: str, subject: str, message: str, inquiry_type: str, organization: Optional[str], schedule: Optional[str]) -> None:
     msg = MIMEMultipart("alternative")
     msg["Subject"] = f"New Contact Inquiry: {subject}"
     msg["From"] = settings.smtp_from_email
