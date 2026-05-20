@@ -57,7 +57,7 @@ async def send_contact_notification(name: str, email: str, subject: str, message
         port=settings.smtp_port,
         username=settings.smtp_username,
         password=settings.smtp_password,
-        start_tls=settings.smtp_use_tls,
+        use_tls=settings.smtp_use_tls,
     )
 
 
@@ -93,5 +93,5 @@ async def send_otp_email(code: str) -> None:
         port=settings.smtp_port,
         username=settings.smtp_username,
         password=settings.smtp_password,
-        start_tls=settings.smtp_use_tls,
+        use_tls=settings.smtp_use_tls,
     )
