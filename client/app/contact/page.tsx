@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { QuoteAndNewsletter } from "../components/QuoteAndNewsletter";
+import { contactsApi } from "../lib/api";
 
 type InquiryType = "reader" | "press" | "publishers" | "events";
 
@@ -199,15 +200,10 @@ type Confirmation = {
   subject: string;
 };
 
-function generateReference() {
-  const stamp = Date.now().toString(36).toUpperCase().slice(-5);
-  const rand = Math.random().toString(36).toUpperCase().slice(2, 6);
-  return `OBU-${stamp}-${rand}`;
-}
-
 function ContactForm() {
   const [selected, setSelected] = useState<InquiryType>("reader");
   const [status, setStatus] = useState<SubmitStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const current = INQUIRIES.find((i) => i.value === selected)!;
 
@@ -216,24 +212,47 @@ function ContactForm() {
     const form = e.currentTarget;
     const data = new FormData(form);
 
+    const name = String(data.get("name") ?? "").trim();
+    const email = String(data.get("email") ?? "").trim();
+    const subject = String(data.get("subject") ?? "").trim();
+    const message = String(data.get("message") ?? "").trim();
+    const organization = String(data.get("organization") ?? "").trim();
+    const schedule = String(data.get("schedule") ?? "").trim();
+
     setStatus("sending");
+    setErrorMessage("");
 
-    // Simulated backend round-trip — swap for fetch("/api/contact", ...) once wired up.
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    try {
+      const submission = await contactsApi.create({
+        name,
+        email,
+        subject,
+        message,
+        inquiry_type: selected,
+        ...(organization ? { organization } : {}),
+        ...(schedule ? { schedule } : {}),
+      });
 
-    setConfirmation({
-      reference: generateReference(),
-      inquiry: selected,
-      name: String(data.get("name") ?? ""),
-      email: String(data.get("email") ?? ""),
-      subject: String(data.get("subject") ?? ""),
-    });
-    setStatus("sent");
-    form.reset();
+      setConfirmation({
+        reference: `OBU-${String(submission.id).padStart(5, "0")}`,
+        inquiry: selected,
+        name,
+        email,
+        subject,
+      });
+      setStatus("sent");
+      form.reset();
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : "Something went wrong sending your inquiry.",
+      );
+      setStatus("error");
+    }
   };
 
   const reset = () => {
     setStatus("idle");
+    setErrorMessage("");
     setConfirmation(null);
   };
 
@@ -294,7 +313,7 @@ function ContactForm() {
                     role="alert"
                     className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-sm px-4 py-3"
                   >
-                    Something went wrong sending your inquiry. Please try again.
+                    {errorMessage || "Something went wrong sending your inquiry. Please try again."}
                   </p>
                 )}
 
