@@ -14,6 +14,12 @@ import {
   siteContentApi,
   slugify,
 } from "./lib/api";
+import {
+  FALLBACK_BLOGS,
+  FALLBACK_BOOKS,
+  FALLBACK_GALLERY,
+  FALLBACK_SITE,
+} from "./lib/fallback";
 
 async function loadData() {
   const [siteRes, booksRes, blogsRes, galleryRes] = await Promise.allSettled([
@@ -31,11 +37,11 @@ async function loadData() {
 }
 
 function HeroSection({ site }: { site: SiteContent | null }) {
-  const kicker = site?.hero_kicker ?? "Novelist. Story-teller. Civil engineer.";
-  const title = site?.hero_title ?? "Obinna Udenwe";
-  const subtitle = site?.hero_subtitle ?? "Award-winning Nigerian author of power, faith, and consequence.";
-  const cta = site?.hero_cta_label ?? "Explore Bibliography";
-  const heroImg = site?.hero_image || "/obinna.jpg";
+  const kicker = site?.hero_kicker || FALLBACK_SITE.hero_kicker;
+  const title = site?.hero_title || FALLBACK_SITE.hero_title;
+  const subtitle = site?.hero_subtitle || FALLBACK_SITE.hero_subtitle;
+  const cta = site?.hero_cta_label || FALLBACK_SITE.hero_cta_label;
+  const heroImg = site?.hero_image || FALLBACK_SITE.hero_image;
 
   return (
     <section className="bg-dark-green text-white">
@@ -83,7 +89,7 @@ function HeroSection({ site }: { site: SiteContent | null }) {
 }
 
 function AwardsTicker({ awards }: { awards: string[] }) {
-  if (awards.length === 0) return null;
+  const items = awards.length > 0 ? awards : FALLBACK_SITE.awards;
   return (
     <div
       className="bg-white"
@@ -93,7 +99,7 @@ function AwardsTicker({ awards }: { awards: string[] }) {
       }}
     >
       <div className="px-6 md:px-8 lg:px-16 py-8 md:py-12 grid grid-cols-2 md:flex md:items-center md:justify-between gap-x-6 gap-y-5">
-        {awards.map((award, i) => (
+        {items.map((award, i) => (
           <span
             key={i}
             className="font-sans font-bold text-[11px] md:text-xs uppercase text-black pb-1 text-center md:text-left"
@@ -108,37 +114,38 @@ function AwardsTicker({ awards }: { awards: string[] }) {
 }
 
 function FeaturedBook({ site }: { site: SiteContent | null }) {
-  if (!site) return null;
+  const kicker = site?.featured_kicker || FALLBACK_SITE.featured_kicker;
+  const title = site?.featured_title || FALLBACK_SITE.featured_title;
+  const tagline = site?.featured_tagline || FALLBACK_SITE.featured_tagline;
+  const description = site?.featured_description || FALLBACK_SITE.featured_description;
+  const image = site?.featured_image || FALLBACK_SITE.featured_image;
+
   return (
     <section className="bg-cream sticky top-0 min-h-screen flex items-center">
       <div className="w-full px-6 md:px-8 lg:px-16 py-14 md:py-16">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-10 md:gap-16 lg:gap-24">
           <div className="shrink-0 flex justify-center lg:block">
-            {site.featured_image ? (
-              <Image
-                src={site.featured_image}
-                alt={`${site.featured_title} book cover`}
-                width={449}
-                height={573}
-                className="w-[260px] md:w-[340px] lg:w-[440px] h-auto"
-                unoptimized
-              />
-            ) : null}
+            <Image
+              src={image}
+              alt={`${title} book cover`}
+              width={449}
+              height={573}
+              className="w-[260px] md:w-[340px] lg:w-[440px] h-auto"
+              unoptimized
+            />
           </div>
           <div className="flex-1 space-y-5 md:space-y-6 max-w-full lg:max-w-2xl">
-            {site.featured_kicker ? (
-              <span className="inline-block text-xs md:text-sm font-semibold uppercase tracking-widest text-gold border border-gold px-4 py-1.5 rounded-full">
-                {site.featured_kicker}
-              </span>
-            ) : null}
+            <span className="inline-block text-xs md:text-sm font-semibold uppercase tracking-widest text-gold border border-gold px-4 py-1.5 rounded-full">
+              {kicker}
+            </span>
             <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-dark-green leading-tight">
-              {site.featured_title}
+              {title}
             </h2>
             <p className="font-serif italic text-lg md:text-xl lg:text-2xl text-dark-green/70 leading-snug">
-              {site.featured_tagline}
+              {tagline}
             </p>
             <p className="text-base md:text-[17px] text-foreground/70 leading-relaxed max-w-xl">
-              {site.featured_description}
+              {description}
             </p>
             <div className="flex flex-wrap gap-3 md:gap-4 pt-3">
               <Link
@@ -162,8 +169,9 @@ function FeaturedBook({ site }: { site: SiteContent | null }) {
 }
 
 function BooksSection({ books }: { books: Book[] }) {
-  const published = books.filter((b) => b.status === "published").slice(0, 4);
-  if (published.length === 0) return null;
+  const published = books.filter((b) => b.status === "published");
+  const items = (published.length > 0 ? published : FALLBACK_BOOKS).slice(0, 4);
+
   return (
     <section id="books" className="bg-cream sticky top-0 min-h-screen flex items-start lg:items-center">
       <div className="w-full px-6 md:px-8 lg:px-16 pt-20 md:pt-24 lg:pt-16 pb-10 md:pb-12 lg:pb-16">
@@ -184,7 +192,7 @@ function BooksSection({ books }: { books: Book[] }) {
           </Link>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {published.map((book) => (
+          {items.map((book) => (
             <Link href={`/books/${slugify(book.title)}`} key={book.id} className="group block">
               {book.image ? (
                 <Image
@@ -196,7 +204,7 @@ function BooksSection({ books }: { books: Book[] }) {
                   unoptimized
                 />
               ) : (
-                <div className="aspect-[4/5] bg-dark-green/10 rounded-sm" />
+                <div className="aspect-4/5 bg-dark-green/10 rounded-sm" />
               )}
             </Link>
           ))}
@@ -207,8 +215,7 @@ function BooksSection({ books }: { books: Book[] }) {
 }
 
 function GallerySection({ gallery }: { gallery: GalleryItemApi[] }) {
-  const photos = gallery.slice(0, 4);
-  if (photos.length === 0) return null;
+  const items = (gallery.length > 0 ? gallery : FALLBACK_GALLERY).slice(0, 4);
   return (
     <section className="bg-cream">
       <div className="px-6 md:px-8 lg:px-16 pt-6 md:pt-8 lg:pt-12 pb-0">
@@ -219,7 +226,7 @@ function GallerySection({ gallery }: { gallery: GalleryItemApi[] }) {
           Literary and atmospheric
         </h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          {photos.map((photo) => (
+          {items.map((photo) => (
             <div
               key={photo.id}
               className="aspect-4/3 relative overflow-hidden rounded-sm bg-dark-green/10"
@@ -242,8 +249,8 @@ function GallerySection({ gallery }: { gallery: GalleryItemApi[] }) {
 }
 
 function LatestWriting({ blogs }: { blogs: Blog[] }) {
-  const articles = blogs.filter((b) => b.status === "published").slice(0, 3);
-  if (articles.length === 0) return null;
+  const published = blogs.filter((b) => b.status === "published");
+  const items = (published.length > 0 ? published : FALLBACK_BLOGS).slice(0, 3);
   return (
     <section id="blog" className="bg-cream">
       <div className="px-6 md:px-8 lg:px-16 py-14 md:py-20">
@@ -264,7 +271,7 @@ function LatestWriting({ blogs }: { blogs: Blog[] }) {
           </Link>
         </div>
         <div className="grid md:grid-cols-3 gap-5 md:gap-6">
-          {articles.map((article) => (
+          {items.map((article) => (
             <Link
               href={`/news/${slugify(article.title)}`}
               key={article.id}

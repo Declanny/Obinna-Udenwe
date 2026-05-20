@@ -4,13 +4,15 @@ import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { QuoteAndNewsletter } from "../components/QuoteAndNewsletter";
 import { Book, booksApi, slugify } from "../lib/api";
+import { FALLBACK_BOOKS } from "../lib/fallback";
 
 async function loadBooks(): Promise<Book[]> {
   try {
     const all = await booksApi.list();
-    return all.filter((b) => b.status === "published");
+    const published = all.filter((b) => b.status === "published");
+    return published.length > 0 ? published : FALLBACK_BOOKS;
   } catch {
-    return [];
+    return FALLBACK_BOOKS;
   }
 }
 
@@ -81,35 +83,24 @@ export default async function BooksPage() {
     <>
       <Navbar />
       <section className="bg-cream relative">
-        {books.length === 0 ? (
-          <div className="px-6 md:px-8 lg:px-16 py-32 text-center">
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-dark-green mb-3">
-              Books
-            </h1>
-            <p className="font-serif italic text-base md:text-lg text-dark-green/70">
-              The bibliography is being curated. Check back soon.
-            </p>
+        {books.map((book, i) => (
+          <div
+            key={book.id}
+            className="sticky top-0 min-h-screen flex flex-col justify-center bg-cream px-6 md:px-8 lg:px-16 py-14 md:py-16"
+          >
+            {i === 0 && (
+              <div className="w-full mb-12 md:mb-20 lg:mb-28">
+                <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-dark-green mb-3">
+                  Books
+                </h1>
+                <p className="font-serif italic text-base md:text-lg text-dark-green/70">
+                  Novels, novellas, and collections.
+                </p>
+              </div>
+            )}
+            <BookRow book={book} reverse={i % 2 === 1} />
           </div>
-        ) : (
-          books.map((book, i) => (
-            <div
-              key={book.id}
-              className="sticky top-0 min-h-screen flex flex-col justify-center bg-cream px-6 md:px-8 lg:px-16 py-14 md:py-16"
-            >
-              {i === 0 && (
-                <div className="w-full mb-12 md:mb-20 lg:mb-28">
-                  <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-dark-green mb-3">
-                    Books
-                  </h1>
-                  <p className="font-serif italic text-base md:text-lg text-dark-green/70">
-                    Novels, novellas, and collections.
-                  </p>
-                </div>
-              )}
-              <BookRow book={book} reverse={i % 2 === 1} />
-            </div>
-          ))
-        )}
+        ))}
       </section>
       <QuoteAndNewsletter />
       <Footer />

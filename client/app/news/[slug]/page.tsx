@@ -5,20 +5,21 @@ import { Navbar } from "../../components/Navbar";
 import { Footer } from "../../components/Footer";
 import { QuoteAndNewsletter } from "../../components/QuoteAndNewsletter";
 import { Blog, blogsApi, slugify } from "../../lib/api";
+import { FALLBACK_BLOGS } from "../../lib/fallback";
 
 async function loadBlogs(): Promise<Blog[]> {
   try {
-    return await blogsApi.list();
+    const all = await blogsApi.list();
+    const published = all.filter((b) => b.status === "published");
+    return published.length > 0 ? published : FALLBACK_BLOGS;
   } catch {
-    return [];
+    return FALLBACK_BLOGS;
   }
 }
 
 export async function generateStaticParams() {
   const blogs = await loadBlogs();
-  return blogs
-    .filter((b) => b.status === "published")
-    .map((b) => ({ slug: slugify(b.title) }));
+  return blogs.map((b) => ({ slug: slugify(b.title) }));
 }
 
 export default async function BlogDetailPage({
@@ -28,7 +29,7 @@ export default async function BlogDetailPage({
 }) {
   const { slug } = await params;
   const blogs = await loadBlogs();
-  const blog = blogs.find((b) => slugify(b.title) === slug && b.status === "published");
+  const blog = blogs.find((b) => slugify(b.title) === slug);
   if (!blog) notFound();
 
   const categoryLabel = blog.category === "news" ? "News" : "Blog";

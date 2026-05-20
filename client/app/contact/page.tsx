@@ -189,71 +189,232 @@ function InquiryCard({
   );
 }
 
+type SubmitStatus = "idle" | "sending" | "sent" | "error";
+
+type Confirmation = {
+  reference: string;
+  inquiry: InquiryType;
+  name: string;
+  email: string;
+  subject: string;
+};
+
+function generateReference() {
+  const stamp = Date.now().toString(36).toUpperCase().slice(-5);
+  const rand = Math.random().toString(36).toUpperCase().slice(2, 6);
+  return `OBU-${stamp}-${rand}`;
+}
+
 function ContactForm() {
   const [selected, setSelected] = useState<InquiryType>("reader");
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<SubmitStatus>("idle");
+  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const current = INQUIRIES.find((i) => i.value === selected)!;
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
-    (e.target as HTMLFormElement).reset();
-    setTimeout(() => setSubmitted(false), 4000);
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
+    setStatus("sending");
+
+    // Simulated backend round-trip — swap for fetch("/api/contact", ...) once wired up.
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+
+    setConfirmation({
+      reference: generateReference(),
+      inquiry: selected,
+      name: String(data.get("name") ?? ""),
+      email: String(data.get("email") ?? ""),
+      subject: String(data.get("subject") ?? ""),
+    });
+    setStatus("sent");
+    form.reset();
+  };
+
+  const reset = () => {
+    setStatus("idle");
+    setConfirmation(null);
   };
 
   return (
     <section className="bg-cream">
       <div className="px-6 md:px-8 lg:px-16 py-16 md:py-20 lg:py-24">
         <div className="max-w-4xl mx-auto">
-          <h2 className="font-serif text-2xl md:text-3xl text-dark-green text-center mb-10 md:mb-12">
-            What is the nature of your inquiry?
-          </h2>
+          {status === "sent" && confirmation ? (
+            <ConfirmationCard data={confirmation} onReset={reset} />
+          ) : (
+            <>
+              <h2 className="font-serif text-2xl md:text-3xl text-dark-green text-center mb-10 md:mb-12">
+                What is the nature of your inquiry?
+              </h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-            {INQUIRIES.map((inq) => (
-              <InquiryCard
-                key={inq.value}
-                data={inq}
-                active={selected === inq.value}
-                onSelect={() => setSelected(inq.value)}
-              />
-            ))}
-          </div>
-
-          <form onSubmit={handleSubmit} className="mt-14 md:mt-16 space-y-8">
-            <FormField label="Full Name" name="name" required />
-            <FormField label="Email Address" name="email" type="email" required />
-            <FormField label="Subject" name="subject" required />
-
-            {(current.fields.organization || current.fields.schedule) && (
-              <div className="grid md:grid-cols-2 gap-8">
-                {current.fields.organization && (
-                  <FormField
-                    label={current.fields.organization}
-                    name="organization"
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+                {INQUIRIES.map((inq) => (
+                  <InquiryCard
+                    key={inq.value}
+                    data={inq}
+                    active={selected === inq.value}
+                    onSelect={() => setSelected(inq.value)}
                   />
-                )}
-                {current.fields.schedule && (
-                  <FormField
-                    label={current.fields.schedule}
-                    name="schedule"
-                  />
-                )}
+                ))}
               </div>
-            )}
 
-            <FormField label="Your Message" name="message" textarea required />
+              <form onSubmit={handleSubmit} className="mt-14 md:mt-16 space-y-8">
+                <fieldset
+                  disabled={status === "sending"}
+                  className="space-y-8 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <FormField label="Full Name" name="name" required />
+                  <FormField label="Email Address" name="email" type="email" required />
+                  <FormField label="Subject" name="subject" required />
 
-            <button
-              type="submit"
-              className="w-full bg-gold hover:bg-gold/90 text-white text-xs md:text-sm font-semibold uppercase tracking-[0.25em] py-5 md:py-6 rounded-sm transition-colors"
-            >
-              {submitted ? "Inquiry Sent — Thank You" : "Send Inquiry"}
-            </button>
-          </form>
+                  {(current.fields.organization || current.fields.schedule) && (
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {current.fields.organization && (
+                        <FormField
+                          label={current.fields.organization}
+                          name="organization"
+                        />
+                      )}
+                      {current.fields.schedule && (
+                        <FormField
+                          label={current.fields.schedule}
+                          name="schedule"
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  <FormField label="Your Message" name="message" textarea required />
+                </fieldset>
+
+                {status === "error" && (
+                  <p
+                    role="alert"
+                    className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-sm px-4 py-3"
+                  >
+                    Something went wrong sending your inquiry. Please try again.
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={status === "sending"}
+                  className="w-full bg-gold hover:bg-gold/90 disabled:bg-gold/70 disabled:cursor-wait text-white text-xs md:text-sm font-semibold uppercase tracking-[0.25em] py-5 md:py-6 rounded-sm transition-colors flex items-center justify-center gap-3"
+                >
+                  {status === "sending" ? (
+                    <>
+                      <Spinner />
+                      <span>Sending Inquiry…</span>
+                    </>
+                  ) : (
+                    "Send Inquiry"
+                  )}
+                </button>
+
+                <p className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-dark-green/50 text-center">
+                  Replies typically within 2–3 business days
+                </p>
+              </form>
+            </>
+          )}
         </div>
       </div>
     </section>
+  );
+}
+
+function Spinner() {
+  return (
+    <span
+      aria-hidden
+      className="inline-block h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin"
+    />
+  );
+}
+
+function ConfirmationCard({
+  data,
+  onReset,
+}: {
+  data: Confirmation;
+  onReset: () => void;
+}) {
+  const inquiry = INQUIRIES.find((i) => i.value === data.inquiry)!;
+  return (
+    <div className="bg-white border border-dark-green/15 rounded-sm shadow-sm overflow-hidden">
+      <div className="bg-dark-green text-white px-6 md:px-10 py-8 md:py-10">
+        <div className="flex items-center gap-4 mb-4">
+          <span className="flex items-center justify-center w-11 h-11 rounded-full bg-gold/20 text-gold">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+          <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-gold font-semibold">
+            Inquiry received
+          </p>
+        </div>
+        <h2 className="font-serif text-3xl md:text-4xl leading-tight">
+          Thank you, {data.name.split(" ")[0] || "friend"}.
+        </h2>
+        <p className="text-sm md:text-base text-white/75 mt-3 max-w-lg leading-relaxed">
+          Your {inquiry.label.toLowerCase()} inquiry has been queued. A confirmation
+          has been sent to <span className="text-white">{data.email}</span> and we&apos;ll
+          be in touch within 2–3 business days.
+        </p>
+      </div>
+      <div className="px-6 md:px-10 py-8 md:py-10 grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 text-dark-green">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-dark-green/55 mb-2">
+            Reference
+          </p>
+          <p className="font-mono text-sm md:text-base text-dark-green tracking-wider">
+            {data.reference}
+          </p>
+        </div>
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-dark-green/55 mb-2">
+            Category
+          </p>
+          <p className="font-serif text-base md:text-lg">{inquiry.label}</p>
+        </div>
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-dark-green/55 mb-2">
+            Subject
+          </p>
+          <p className="font-serif text-base md:text-lg break-words">
+            {data.subject || "—"}
+          </p>
+        </div>
+      </div>
+      <div className="px-6 md:px-10 pb-8 md:pb-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <button
+          type="button"
+          onClick={onReset}
+          className="bg-gold hover:bg-gold/90 text-white text-xs font-semibold uppercase tracking-[0.25em] px-6 py-3.5 rounded-sm transition-colors"
+        >
+          Send another inquiry
+        </button>
+        <a
+          href={`mailto:hello@obinnaudenwe.com?subject=${encodeURIComponent(
+            `Re: ${data.reference}`,
+          )}`}
+          className="border border-dark-green/30 hover:border-dark-green text-dark-green text-xs font-semibold uppercase tracking-[0.25em] px-6 py-3.5 rounded-sm transition-colors text-center"
+        >
+          Email us directly
+        </a>
+      </div>
+    </div>
   );
 }
 

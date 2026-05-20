@@ -5,20 +5,21 @@ import { Navbar } from "../../components/Navbar";
 import { Footer } from "../../components/Footer";
 import { QuoteAndNewsletter } from "../../components/QuoteAndNewsletter";
 import { Story, slugify, storiesApi } from "../../lib/api";
+import { FALLBACK_STORIES } from "../../lib/fallback";
 
 async function loadStories(): Promise<Story[]> {
   try {
-    return await storiesApi.list();
+    const all = await storiesApi.list();
+    const published = all.filter((s) => s.status === "published");
+    return published.length > 0 ? published : FALLBACK_STORIES;
   } catch {
-    return [];
+    return FALLBACK_STORIES;
   }
 }
 
 export async function generateStaticParams() {
   const stories = await loadStories();
-  return stories
-    .filter((s) => s.status === "published")
-    .map((s) => ({ slug: slugify(s.title) }));
+  return stories.map((s) => ({ slug: slugify(s.title) }));
 }
 
 function BackRail() {
@@ -48,7 +49,7 @@ export default async function StoryDetailPage({
 }) {
   const { slug } = await params;
   const stories = await loadStories();
-  const story = stories.find((s) => slugify(s.title) === slug && s.status === "published");
+  const story = stories.find((s) => slugify(s.title) === slug);
   if (!story) notFound();
 
   return (

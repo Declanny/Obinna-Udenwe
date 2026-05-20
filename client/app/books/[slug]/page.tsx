@@ -5,20 +5,21 @@ import { Navbar } from "../../components/Navbar";
 import { Footer } from "../../components/Footer";
 import { QuoteAndNewsletter } from "../../components/QuoteAndNewsletter";
 import { Book, booksApi, slugify } from "../../lib/api";
+import { FALLBACK_BOOKS } from "../../lib/fallback";
 
 async function loadBooks(): Promise<Book[]> {
   try {
-    return await booksApi.list();
+    const all = await booksApi.list();
+    const published = all.filter((b) => b.status === "published");
+    return published.length > 0 ? published : FALLBACK_BOOKS;
   } catch {
-    return [];
+    return FALLBACK_BOOKS;
   }
 }
 
 export async function generateStaticParams() {
   const books = await loadBooks();
-  return books
-    .filter((b) => b.status === "published")
-    .map((b) => ({ slug: slugify(b.title) }));
+  return books.map((b) => ({ slug: slugify(b.title) }));
 }
 
 function BookHero({ book }: { book: Book }) {
@@ -165,12 +166,10 @@ export default async function BookDetailPage({
 }) {
   const { slug } = await params;
   const books = await loadBooks();
-  const book = books.find((b) => slugify(b.title) === slug && b.status === "published");
+  const book = books.find((b) => slugify(b.title) === slug);
   if (!book) notFound();
 
-  const others = books.filter(
-    (b) => b.id !== book.id && b.status === "published"
-  );
+  const others = books.filter((b) => b.id !== book.id);
 
   return (
     <>
