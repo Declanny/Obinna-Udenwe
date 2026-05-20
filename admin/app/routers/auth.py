@@ -50,6 +50,28 @@ async def login(payload: LoginRequest) -> OTPSentResponse:
     return OTPSentResponse()
 
 
+@router.post("/resend", response_model=OTPSentResponse)
+async def resend_otp(payload: LoginRequest) -> OTPSentResponse:
+    """Re-validate credentials and dispatch a fresh OTP, invalidating any pending one."""
+    if payload.username != settings.admin_username or not verify_password(
+        payload.password, settings.admin_password_hash
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid credentials",
+        )
+    code = store_otp(payload.username)
+    try:
+        await send_otp_email(code)
+    except Exception as exc:
+        logger.exception("SMTP error resending OTP to %s: %s", settings.admin_email, exc)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Failed to send verification email: {exc}",
+        )
+    return OTPSentResponse()
+
+
 @router.post("/verify", response_model=TokenResponse)
 async def verify_otp(payload: VerifyOTPRequest) -> TokenResponse:
     """Step 2 — exchange a valid OTP for a JWT."""
