@@ -15,6 +15,6 @@ class ContactSubmission(Base):
     subject: Mapped[str] = mapped_column(String, nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     inquiry_type: Mapped[str] = mapped_column(String, nullable=False)
-    organization: Mapped[str | None] = mapped_column(String, nullable=True)
-    schedule: Mapped[str | None] = mapped_column(String, nullable=True)
+    organization: Mapped[str] = mapped_column(String, default="")
+    schedule: Mapped[str] = mapped_column(String, default="")
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)

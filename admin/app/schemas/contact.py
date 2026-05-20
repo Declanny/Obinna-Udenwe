@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class ContactSubmissionCreate(BaseModel):
     name: str
-    email: EmailStr
+    email: str
     subject: str
     message: str
     inquiry_type: Literal["reader", "press", "publishers", "events"]
