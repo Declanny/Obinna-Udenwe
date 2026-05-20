@@ -268,23 +268,8 @@ export const subscribersApi = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      },
+      }
     ),
-};
-
-// ---------------- Contact ----------------
-
-export const contactsApi = {
-  create: (payload: ContactSubmissionCreate) =>
-    request<ContactSubmission>("/contact/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }),
-  list: () =>
-    request<ContactSubmission[]>("/contact/", { headers: authHeaders() }),
-  remove: (id: number) =>
-    request<void>(`/contact/${id}`, { method: "DELETE", headers: authHeaders() }),
 };
 
 // ---------------- Slug helper ----------------
