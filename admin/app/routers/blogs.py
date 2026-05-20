@@ -1,14 +1,27 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.cloudinary_utils import upload_to_cloudinary
+from app.config import settings
 from app.dependencies import get_current_admin, get_db
+from app.email_utils import send_content_broadcast
 from app.models.blog import Blog
+from app.models.subscriber import Subscriber
 from app.schemas.blog import BlogOut
 
 router = APIRouter()
+
+
+def _maybe_notify(db: Session, background_tasks: BackgroundTasks, blog: Blog, notify: bool) -> None:
+    if notify and blog.status == "published":
+        subs = db.query(Subscriber).all()
+        if subs:
+            url = f"{settings.client_url}/news/{blog.id}"
+            background_tasks.add_task(
+                send_content_broadcast, subs, "blog", blog.title, blog.excerpt, blog.cover, url
+            )
 
 
 @router.get("/", response_model=list[BlogOut])
@@ -18,12 +31,14 @@ def list_blogs(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=BlogOut, dependencies=[Depends(get_current_admin)])
 async def create_blog(
+    background_tasks: BackgroundTasks,
     title: str = Form(...),
     category: str = Form("blog"),
     published_on: str = Form(""),
     excerpt: str = Form(""),
     body: str = Form(""),
     status: str = Form("draft"),
+    notify_subscribers: bool = Form(False),
     cover: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
@@ -40,6 +55,7 @@ async def create_blog(
     db.add(blog)
     db.commit()
     db.refresh(blog)
+    _maybe_notify(db, background_tasks, blog, notify_subscribers)
     return blog
 
 
@@ -54,12 +70,14 @@ def get_blog(blog_id: int, db: Session = Depends(get_db)):
 @router.put("/{blog_id}", response_model=BlogOut, dependencies=[Depends(get_current_admin)])
 async def update_blog(
     blog_id: int,
+    background_tasks: BackgroundTasks,
     title: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
     published_on: Optional[str] = Form(None),
     excerpt: Optional[str] = Form(None),
     body: Optional[str] = Form(None),
     status: Optional[str] = Form(None),
+    notify_subscribers: bool = Form(False),
     cover: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
@@ -82,6 +100,7 @@ async def update_blog(
         blog.status = status
     db.commit()
     db.refresh(blog)
+    _maybe_notify(db, background_tasks, blog, notify_subscribers)
     return blog
 
 

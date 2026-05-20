@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     resend_from_email: str = "Obinna Udenwe <onboarding@resend.dev>"
     admin_email: str
 
+    # Client
+    client_url: str = "https://obinnaudenwe.com"
+
     model_config = {"env_file": ".env"}
 
 

@@ -1,14 +1,27 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.cloudinary_utils import upload_to_cloudinary
+from app.config import settings
 from app.dependencies import get_current_admin, get_db
+from app.email_utils import send_content_broadcast
 from app.models.book import Book
+from app.models.subscriber import Subscriber
 from app.schemas.book import BookOut
 
 router = APIRouter()
+
+
+def _maybe_notify(db: Session, background_tasks: BackgroundTasks, book: Book, notify: bool) -> None:
+    if notify and book.status == "published":
+        subs = db.query(Subscriber).all()
+        if subs:
+            url = f"{settings.client_url}/books/{book.id}"
+            background_tasks.add_task(
+                send_content_broadcast, subs, "book", book.title, book.tagline, book.image, url
+            )
 
 
 @router.get("/", response_model=list[BookOut])
@@ -18,11 +31,13 @@ def list_books(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=BookOut, dependencies=[Depends(get_current_admin)])
 async def create_book(
+    background_tasks: BackgroundTasks,
     title: str = Form(...),
     year: int = Form(...),
     tagline: str = Form(""),
     description: str = Form(""),
     status: str = Form("draft"),
+    notify_subscribers: bool = Form(False),
     image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
@@ -38,6 +53,7 @@ async def create_book(
     db.add(book)
     db.commit()
     db.refresh(book)
+    _maybe_notify(db, background_tasks, book, notify_subscribers)
     return book
 
 
@@ -52,11 +68,13 @@ def get_book(book_id: int, db: Session = Depends(get_db)):
 @router.put("/{book_id}", response_model=BookOut, dependencies=[Depends(get_current_admin)])
 async def update_book(
     book_id: int,
+    background_tasks: BackgroundTasks,
     title: Optional[str] = Form(None),
     year: Optional[int] = Form(None),
     tagline: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     status: Optional[str] = Form(None),
+    notify_subscribers: bool = Form(False),
     image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
@@ -77,6 +95,7 @@ async def update_book(
         book.status = status
     db.commit()
     db.refresh(book)
+    _maybe_notify(db, background_tasks, book, notify_subscribers)
     return book
 
 

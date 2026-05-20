@@ -217,6 +217,20 @@ export const siteContentApi = {
     }),
 };
 
+// ---------------- Subscribers ----------------
+
+export const subscribersApi = {
+  subscribe: (data: { name: string; email: string }) =>
+    request<{ id: number; name: string; email: string; subscribed_at: string }>(
+      "/subscribers/",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }
+    ),
+};
+
 // ---------------- Slug helper ----------------
 
 export function slugify(value: string): string {
