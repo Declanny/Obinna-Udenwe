@@ -65,6 +65,23 @@ export type MediaAssetApi = {
   created_at: string;
 };
 
+export type ContactInquiryType = "reader" | "press" | "publishers" | "events";
+
+export type ContactSubmissionCreate = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  inquiry_type: ContactInquiryType;
+  organization?: string;
+  schedule?: string;
+};
+
+export type ContactSubmission = ContactSubmissionCreate & {
+  id: number;
+  created_at: string;
+};
+
 export type SiteContent = {
   id: number;
   hero_kicker: string;
@@ -106,7 +123,7 @@ function authHeaders(): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export async function login(username: string, password: string): Promise<string> {
+export async function login(username: string, password: string): Promise<void> {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -115,6 +132,30 @@ export async function login(username: string, password: string): Promise<string>
   if (!res.ok) {
     const detail = await res.json().catch(() => ({}));
     throw new Error(detail?.detail ?? "Login failed");
+  }
+}
+
+export async function resendOtp(username: string, password: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/auth/resend`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(detail?.detail ?? "Could not resend code");
+  }
+}
+
+export async function verifyOtp(username: string, code: string): Promise<string> {
+  const res = await fetch(`${API_BASE}/auth/verify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, code }),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(detail?.detail ?? "Verification failed");
   }
   const data = (await res.json()) as { access_token: string };
   setToken(data.access_token);

@@ -57,7 +57,7 @@ function HeroSection({ site }: { site: SiteContent | null }) {
             {subtitle}
           </p>
           <Link
-            href="#books"
+            href="/about"
             className="inline-block bg-gold text-white text-xs font-semibold uppercase tracking-widest px-6 py-3 rounded-sm hover:bg-gold/90 transition-colors mt-2"
           >
             {cta}
