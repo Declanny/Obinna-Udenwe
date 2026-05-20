@@ -15,14 +15,10 @@ class Settings(BaseSettings):
     cloudinary_api_secret: str
     cloudinary_folder: str = "obinna-udenwe"
 
-    # Email OTP
-    smtp_host: str = "smtp.gmail.com"
-    smtp_port: int = 465
-    smtp_username: str
-    smtp_password: str
-    smtp_from_email: str
+    # Email
+    resend_api_key: str
+    resend_from_email: str = "Obinna Udenwe <onboarding@resend.dev>"
     admin_email: str
-    smtp_use_tls: bool = True
 
     model_config = {"env_file": ".env"}
 
