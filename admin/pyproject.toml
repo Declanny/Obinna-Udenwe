@@ -13,4 +13,5 @@ dependencies = [
     "python-multipart",
     "cloudinary",
     "resend",
+    "sqlitecloud",
 ]
