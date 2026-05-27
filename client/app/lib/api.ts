@@ -162,6 +162,25 @@ export async function verifyOtp(username: string, code: string): Promise<string>
   return data.access_token;
 }
 
+export async function requestChangePasswordOtp(): Promise<void> {
+  await request<{ message: string }>("/auth/change-password/request-otp", {
+    method: "POST",
+    headers: authHeaders(),
+  });
+}
+
+export async function confirmChangePassword(input: {
+  otp_code: string;
+  old_password: string;
+  new_password: string;
+}): Promise<void> {
+  await request<{ message: string }>("/auth/change-password/confirm", {
+    method: "POST",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+}
+
 // ---------------- Fetch helper ----------------
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
