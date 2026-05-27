@@ -27,3 +27,19 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def update_password_hash(new_hash: str) -> None:
+    import re
+    from pathlib import Path
+
+    env_path = Path(__file__).parent.parent / ".env"
+    content = env_path.read_text()
+    content = re.sub(
+        r"^ADMIN_PASSWORD_HASH=.*$",
+        f"ADMIN_PASSWORD_HASH={new_hash}",
+        content,
+        flags=re.MULTILINE,
+    )
+    env_path.write_text(content)
+    settings.admin_password_hash = new_hash

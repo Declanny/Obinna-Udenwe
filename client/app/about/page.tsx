@@ -1,9 +1,33 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { QuoteAndNewsletter } from "../components/QuoteAndNewsletter";
+import { jsonLdScript, personSchema } from "../lib/seo";
 import { AboutContent } from "./AboutContent";
+
+export const metadata: Metadata = {
+  title: { absolute: "About Obinna Udenwe — Award-winning Nigerian Novelist" },
+  description:
+    "Meet Obinna Udenwe — Nigerian novelist, short-story writer, and civil engineer. Winner of the Chinua Achebe Prize, ANA Prize, and Prairie Schooner — Glenna Luschei Prize.",
+  alternates: { canonical: "/about" },
+  openGraph: {
+    type: "profile",
+    title: "About Obinna Udenwe",
+    description:
+      "Nigerian novelist and storyteller. Author of Satans & Shaitans, Colours of Hatred, and Years of Shame.",
+    url: "/about",
+    images: ["/Obinna Udenwe Portrait.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Obinna Udenwe",
+    description:
+      "Nigerian novelist and storyteller. Author of Satans & Shaitans, Colours of Hatred, and Years of Shame.",
+    images: ["/Obinna Udenwe Portrait.png"],
+  },
+};
 
 function AboutHero() {
   return (
@@ -146,6 +170,10 @@ function CTASection() {
 export default function AboutPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(personSchema) }}
+      />
       <Navbar />
       <AboutHero />
       <AboutContent />

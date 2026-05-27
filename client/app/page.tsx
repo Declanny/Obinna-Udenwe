@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { QuoteAndNewsletter } from "./components/QuoteAndNewsletter";
+import { jsonLdScript, personSchema, websiteSchema } from "./lib/seo";
 import {
   Blog,
   Book,
@@ -298,6 +299,14 @@ export default async function Home() {
   const { site, books, blogs, gallery } = await loadData();
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(personSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(websiteSchema) }}
+      />
       <Navbar />
       <HeroSection site={site} />
       <AwardsTicker awards={site?.awards ?? []} />

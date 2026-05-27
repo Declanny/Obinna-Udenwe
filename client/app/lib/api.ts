@@ -165,10 +165,17 @@ export async function verifyOtp(username: string, code: string): Promise<string>
 // ---------------- Fetch helper ----------------
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    cache: "no-store",
-    ...init,
-  });
+  const method = (init.method ?? "GET").toUpperCase();
+  const isRead = method === "GET";
+
+  // Reads: cache for 60s and fail fast (3s) so a sleeping backend doesn't block
+  // page renders — the calling page falls back immediately.
+  // Writes: never cache and allow a longer window for the round trip.
+  const defaults: RequestInit & { next?: { revalidate?: number } } = isRead
+    ? { next: { revalidate: 60 }, signal: AbortSignal.timeout(3000) }
+    : { cache: "no-store", signal: AbortSignal.timeout(20000) };
+
+  const res = await fetch(`${API_BASE}${path}`, { ...defaults, ...init });
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
     throw new Error(`${res.status} ${res.statusText}: ${detail}`);

@@ -18,3 +18,13 @@ class OTPSentResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class ChangePasswordRequest(BaseModel):
+    otp_code: str
+    old_password: str
+    new_password: str
+
+
+class PasswordChangedResponse(BaseModel):
+    message: str = "Password updated successfully"

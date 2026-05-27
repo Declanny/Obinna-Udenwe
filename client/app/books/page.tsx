@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "../components/Navbar";
@@ -5,6 +6,29 @@ import { Footer } from "../components/Footer";
 import { QuoteAndNewsletter } from "../components/QuoteAndNewsletter";
 import { Book, booksApi, slugify } from "../lib/api";
 import { FALLBACK_BOOKS } from "../lib/fallback";
+import { absoluteUrl, jsonLdScript, SITE_URL } from "../lib/seo";
+
+export const metadata: Metadata = {
+  title: { absolute: "Books by Obinna Udenwe — Novels & Literary Thrillers" },
+  description:
+    "Explore the bibliography of Obinna Udenwe: Satans & Shaitans, Colours of Hatred, Years of Shame, and more — award-winning Nigerian literary thrillers.",
+  alternates: { canonical: "/books" },
+  openGraph: {
+    type: "website",
+    title: "Books by Obinna Udenwe",
+    description:
+      "Bibliography of award-winning Nigerian novelist Obinna Udenwe — literary thrillers of power, faith, and consequence.",
+    url: "/books",
+    images: ["/book1.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Books by Obinna Udenwe",
+    description:
+      "Bibliography of award-winning Nigerian novelist Obinna Udenwe — literary thrillers of power, faith, and consequence.",
+    images: ["/book1.png"],
+  },
+};
 
 async function loadBooks(): Promise<Book[]> {
   try {
@@ -79,8 +103,28 @@ function BookRow({ book, reverse }: { book: Book; reverse: boolean }) {
 export default async function BooksPage() {
   const books = await loadBooks();
 
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Books by Obinna Udenwe",
+    url: `${SITE_URL}/books`,
+    hasPart: books.map((book) => ({
+      "@type": "Book",
+      name: book.title,
+      url: `${SITE_URL}/books/${slugify(book.title)}`,
+      image: book.image ? absoluteUrl(book.image) : undefined,
+      datePublished: String(book.year),
+      author: { "@type": "Person", name: "Obinna Udenwe" },
+      description: book.tagline || book.description,
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(collectionSchema) }}
+      />
       <Navbar />
       <section className="bg-cream relative">
         {books.map((book, i) => (

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,6 +7,14 @@ import { Footer } from "../../components/Footer";
 import { QuoteAndNewsletter } from "../../components/QuoteAndNewsletter";
 import { Book, booksApi, slugify } from "../../lib/api";
 import { FALLBACK_BOOKS } from "../../lib/fallback";
+import {
+  absoluteUrl,
+  AUTHOR_NAME,
+  DEFAULT_OG_IMAGE,
+  jsonLdScript,
+  SITE_URL,
+  truncate,
+} from "../../lib/seo";
 
 async function loadBooks(): Promise<Book[]> {
   try {
@@ -20,6 +29,40 @@ async function loadBooks(): Promise<Book[]> {
 export async function generateStaticParams() {
   const books = await loadBooks();
   return books.map((b) => ({ slug: slugify(b.title) }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const books = await loadBooks();
+  const book = books.find((b) => slugify(b.title) === slug);
+  if (!book) {
+    return { title: "Book not found", robots: { index: false, follow: false } };
+  }
+  const description = truncate(book.description || book.tagline || "", 160);
+  const image = book.image || DEFAULT_OG_IMAGE;
+  const canonical = `/books/${slug}`;
+  return {
+    title: `${book.title} (${book.year}) — A Novel by Obinna Udenwe`,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "book",
+      title: book.title,
+      description,
+      url: canonical,
+      images: [absoluteUrl(image)],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: book.title,
+      description,
+      images: [absoluteUrl(image)],
+    },
+  };
 }
 
 function BookHero({ book }: { book: Book }) {
@@ -171,8 +214,25 @@ export default async function BookDetailPage({
 
   const others = books.filter((b) => b.id !== book.id);
 
+  const bookSchema = {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    name: book.title,
+    bookFormat: "https://schema.org/Hardcover",
+    image: absoluteUrl(book.image || DEFAULT_OG_IMAGE),
+    description: truncate(book.description || book.tagline || "", 500),
+    datePublished: String(book.year),
+    inLanguage: "en",
+    author: { "@type": "Person", name: AUTHOR_NAME, url: SITE_URL },
+    url: `${SITE_URL}/books/${slug}`,
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(bookSchema) }}
+      />
       <Navbar />
       <BookHero book={book} />
       <GetYourCopy />
