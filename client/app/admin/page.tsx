@@ -15,9 +15,11 @@ import {
   blogsApi,
   booksApi,
   clearToken,
+  confirmChangePassword,
   galleryApi,
   getToken,
   mediaApi,
+  requestChangePasswordOtp,
   siteContentApi,
   storiesApi,
 } from "../lib/api";
@@ -139,11 +141,13 @@ function GhostButton({
   onClick,
   tone = "default",
   type = "button",
+  disabled,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   tone?: "default" | "danger";
   type?: "button" | "submit";
+  disabled?: boolean;
 }) {
   const cls =
     tone === "danger"
@@ -153,7 +157,8 @@ function GhostButton({
     <button
       type={type}
       onClick={onClick}
-      className={`text-xs uppercase tracking-widest font-semibold px-4 py-2.5 rounded-sm transition-colors ${cls}`}
+      disabled={disabled}
+      className={`text-xs uppercase tracking-widest font-semibold px-4 py-2.5 rounded-sm transition-colors disabled:opacity-60 ${cls}`}
     >
       {children}
     </button>
@@ -306,6 +311,7 @@ export default function AdminDashboardPage() {
   const [editingStory, setEditingStory] = useState<Story | null>(null);
   const [editingGallery, setEditingGallery] = useState<GalleryItemApi | null>(null);
   const [creating, setCreating] = useState<null | "book" | "blog" | "story" | "gallery">(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const refreshAll = useCallback(async () => {
     setLoading(true);
@@ -742,6 +748,18 @@ export default function AdminDashboardPage() {
             </>
           )}
         </section>
+
+        <div className="px-6 md:px-8 lg:px-16 pb-6 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowPasswordModal(true)}
+            aria-label="Change password"
+            title="Change password"
+            className="text-2xl opacity-40 hover:opacity-100 transition-opacity"
+          >
+            🔑
+          </button>
+        </div>
       </main>
       <Footer />
 
@@ -848,7 +866,202 @@ export default function AdminDashboardPage() {
           }}
         />
       </Modal>
+
+      <Modal
+        open={showPasswordModal}
+        title="Change Password"
+        onClose={() => setShowPasswordModal(false)}
+      >
+        <ChangePasswordForm onClose={() => setShowPasswordModal(false)} />
+      </Modal>
     </>
+  );
+}
+
+// ----------------- Change password -----------------
+
+function ChangePasswordForm({ onClose }: { onClose: () => void }) {
+  const [stage, setStage] = useState<"request" | "form" | "done">("request");
+  const [otpCode, setOtpCode] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function sendCode() {
+    setError("");
+    setInfo("");
+    setSubmitting(true);
+    try {
+      await requestChangePasswordOtp();
+      setStage("form");
+      setInfo("We sent a 6-digit verification code to the admin email.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send verification code.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function resendCode() {
+    setError("");
+    setInfo("");
+    setSubmitting(true);
+    try {
+      await requestChangePasswordOtp();
+      setInfo("A new verification code has been sent.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not resend code.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    if (!/^\d{6}$/.test(otpCode)) {
+      setError("Enter the 6-digit code from your email.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setError("New password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("New password and confirmation do not match.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await confirmChangePassword({
+        otp_code: otpCode,
+        old_password: oldPassword,
+        new_password: newPassword,
+      });
+      setStage("done");
+      setInfo("Password updated.");
+      setTimeout(onClose, 1500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update password.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (stage === "request") {
+    return (
+      <div className="space-y-5">
+        <p className="text-sm text-foreground/70">
+          We&apos;ll email a 6-digit verification code to the admin address. You&apos;ll use it
+          along with your current password to set a new one.
+        </p>
+        {error ? <p className="text-xs text-rose-700">{error}</p> : null}
+        <div className="flex items-center gap-3">
+          <PrimaryButton onClick={sendCode} disabled={submitting}>
+            {submitting ? "Sending…" : "Send verification code"}
+          </PrimaryButton>
+          <GhostButton onClick={onClose} disabled={submitting}>
+            Cancel
+          </GhostButton>
+        </div>
+      </div>
+    );
+  }
+
+  if (stage === "done") {
+    return (
+      <div className="space-y-3">
+        <p className="text-sm font-semibold text-dark-green">Password updated.</p>
+        <p className="text-xs text-foreground/60">You remain signed in with your existing session.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form className="space-y-4" onSubmit={onSubmit}>
+      <div>
+        <label className="text-[10px] uppercase tracking-widest text-foreground/60 block mb-1.5">
+          Current Password
+        </label>
+        <input
+          type="password"
+          value={oldPassword}
+          onChange={(e) => setOldPassword(e.target.value)}
+          className="w-full border border-dark-green/20 rounded-sm px-3 py-2.5 text-sm"
+          autoComplete="current-password"
+        />
+      </div>
+      <div>
+        <label className="text-[10px] uppercase tracking-widest text-foreground/60 block mb-1.5">
+          New Password
+        </label>
+        <input
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          className="w-full border border-dark-green/20 rounded-sm px-3 py-2.5 text-sm"
+          autoComplete="new-password"
+        />
+      </div>
+      <div>
+        <label className="text-[10px] uppercase tracking-widest text-foreground/60 block mb-1.5">
+          Confirm New Password
+        </label>
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className="w-full border border-dark-green/20 rounded-sm px-3 py-2.5 text-sm"
+          autoComplete="new-password"
+        />
+      </div>
+      <div>
+        <label className="text-[10px] uppercase tracking-widest text-foreground/60 block mb-1.5">
+          Verification Code
+        </label>
+        <input
+          value={otpCode}
+          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+          placeholder="••••••"
+          className="w-full border border-dark-green/20 rounded-sm px-3 py-2.5 text-center text-lg tracking-[0.5em] font-semibold"
+        />
+      </div>
+      {info ? <p className="text-xs text-dark-green/70">{info}</p> : null}
+      {error ? <p className="text-xs text-rose-700">{error}</p> : null}
+      <div className="flex items-center justify-between pt-1">
+        <button
+          type="button"
+          onClick={resendCode}
+          disabled={submitting}
+          className="text-[10px] uppercase tracking-widest text-dark-green/70 hover:text-gold transition-colors disabled:opacity-60"
+        >
+          Resend code
+        </button>
+        <div className="flex items-center gap-3">
+          <GhostButton onClick={onClose} disabled={submitting}>
+            Cancel
+          </GhostButton>
+          <PrimaryButton
+            type="submit"
+            disabled={
+              submitting ||
+              otpCode.length !== 6 ||
+              !oldPassword ||
+              !newPassword ||
+              !confirmPassword
+            }
+          >
+            {submitting ? "Updating…" : "Update password"}
+          </PrimaryButton>
+        </div>
+      </div>
+    </form>
   );
 }
 
