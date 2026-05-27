@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,6 +7,14 @@ import { Footer } from "../../components/Footer";
 import { QuoteAndNewsletter } from "../../components/QuoteAndNewsletter";
 import { Story, slugify, storiesApi } from "../../lib/api";
 import { FALLBACK_STORIES } from "../../lib/fallback";
+import {
+  absoluteUrl,
+  AUTHOR_NAME,
+  DEFAULT_OG_IMAGE,
+  jsonLdScript,
+  SITE_URL,
+  truncate,
+} from "../../lib/seo";
 
 async function loadStories(): Promise<Story[]> {
   try {
@@ -20,6 +29,41 @@ async function loadStories(): Promise<Story[]> {
 export async function generateStaticParams() {
   const stories = await loadStories();
   return stories.map((s) => ({ slug: slugify(s.title) }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const stories = await loadStories();
+  const story = stories.find((s) => slugify(s.title) === slug);
+  if (!story) {
+    return { title: "Story not found", robots: { index: false, follow: false } };
+  }
+  const description = truncate(story.excerpt || story.body || "", 160);
+  const image = story.cover || DEFAULT_OG_IMAGE;
+  const canonical = `/stories/${slug}`;
+  return {
+    title: story.title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      title: story.title,
+      description,
+      url: canonical,
+      images: [absoluteUrl(image)],
+      authors: [AUTHOR_NAME],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: story.title,
+      description,
+      images: [absoluteUrl(image)],
+    },
+  };
 }
 
 function BackRail() {
@@ -52,8 +96,26 @@ export default async function StoryDetailPage({
   const story = stories.find((s) => slugify(s.title) === slug);
   if (!story) notFound();
 
+  const storySchema = {
+    "@context": "https://schema.org",
+    "@type": "ShortStory",
+    name: story.title,
+    headline: story.title,
+    description: truncate(story.excerpt || story.body || "", 200),
+    image: absoluteUrl(story.cover || DEFAULT_OG_IMAGE),
+    author: { "@type": "Person", name: AUTHOR_NAME, url: SITE_URL },
+    publisher: { "@type": "Person", name: AUTHOR_NAME, url: SITE_URL },
+    inLanguage: "en",
+    timeRequired: story.read_time || undefined,
+    url: `${SITE_URL}/stories/${slug}`,
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(storySchema) }}
+      />
       <Navbar />
       <BackRail />
       <section className="bg-cream">

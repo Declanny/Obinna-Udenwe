@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,6 +7,14 @@ import { Footer } from "../../components/Footer";
 import { QuoteAndNewsletter } from "../../components/QuoteAndNewsletter";
 import { Blog, blogsApi, slugify } from "../../lib/api";
 import { FALLBACK_BLOGS } from "../../lib/fallback";
+import {
+  absoluteUrl,
+  AUTHOR_NAME,
+  DEFAULT_OG_IMAGE,
+  jsonLdScript,
+  SITE_URL,
+  truncate,
+} from "../../lib/seo";
 
 async function loadBlogs(): Promise<Blog[]> {
   try {
@@ -22,6 +31,47 @@ export async function generateStaticParams() {
   return blogs.map((b) => ({ slug: slugify(b.title) }));
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const blogs = await loadBlogs();
+  const blog = blogs.find((b) => slugify(b.title) === slug);
+  if (!blog) {
+    return {
+      title: "Post not found",
+      robots: { index: false, follow: false },
+    };
+  }
+  const description = truncate(blog.excerpt || blog.body || "", 160);
+  const cover = blog.cover || DEFAULT_OG_IMAGE;
+  const canonical = `/news/${slug}`;
+  return {
+    title: blog.title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      title: blog.title,
+      description,
+      url: canonical,
+      images: [absoluteUrl(cover)],
+      publishedTime: blog.published_on || blog.created_at || undefined,
+      modifiedTime: blog.updated_at || undefined,
+      authors: [AUTHOR_NAME],
+      tags: [blog.category],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: blog.title,
+      description,
+      images: [absoluteUrl(cover)],
+    },
+  };
+}
+
 export default async function BlogDetailPage({
   params,
 }: {
@@ -32,10 +82,33 @@ export default async function BlogDetailPage({
   const blog = blogs.find((b) => slugify(b.title) === slug);
   if (!blog) notFound();
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: blog.title,
+    description: truncate(blog.excerpt || blog.body || "", 200),
+    image: blog.cover ? absoluteUrl(blog.cover) : absoluteUrl(DEFAULT_OG_IMAGE),
+    datePublished: blog.published_on || blog.created_at || undefined,
+    dateModified: blog.updated_at || blog.created_at || undefined,
+    author: { "@type": "Person", name: AUTHOR_NAME, url: SITE_URL },
+    publisher: {
+      "@type": "Person",
+      name: AUTHOR_NAME,
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: absoluteUrl("/icon.png") },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/news/${slug}` },
+    articleSection: blog.category === "news" ? "News" : "Blog",
+  };
+
   const categoryLabel = blog.category === "news" ? "News" : "Blog";
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(articleSchema) }}
+      />
       <Navbar />
       <section className="bg-cream">
         <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-12 pt-12 md:pt-16 pb-10">
