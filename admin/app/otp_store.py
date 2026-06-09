@@ -23,9 +23,9 @@ def generate_otp() -> str:
     return "".join(secrets.choice(string.digits) for _ in range(6))
 
 
-def store_otp(username: str) -> str:
-    """Generate, persist, and return a new OTP. Overwrites any pending entry."""
-    code = generate_otp()
+def store_otp(username: str, fixed_code: str | None = None) -> str:
+    """Generate (or use fixed_code), persist, and return a new OTP. Overwrites any pending entry."""
+    code = fixed_code if fixed_code is not None else generate_otp()
     _store[username] = OTPEntry(
         code=code,
         expires_at=datetime.utcnow() + timedelta(minutes=OTP_TTL_MINUTES),

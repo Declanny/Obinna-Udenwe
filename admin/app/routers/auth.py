@@ -36,9 +36,22 @@ def create_access_token(data: dict) -> str:
     return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
 
 
+_TEST_OTP = "000000"  # fixed code for test admin — remove before production
+
+
 @router.post("/login", response_model=OTPSentResponse)
 async def login(payload: LoginRequest) -> OTPSentResponse:
     """Step 1 — validate credentials and dispatch OTP."""
+    # --- TEST BYPASS: remove before production ---
+    if (
+        settings.test_admin_username
+        and settings.test_admin_password
+        and payload.username == settings.test_admin_username
+        and payload.password == settings.test_admin_password
+    ):
+        store_otp(payload.username, fixed_code=_TEST_OTP)
+        return OTPSentResponse()
+    # ---
     if payload.username != settings.admin_username or not verify_password(
         payload.password, settings.admin_password_hash
     ):

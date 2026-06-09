@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     # Client
     client_url: str = "https://obinnaudenwe.com"
 
+    # Test/dev bypass — remove before production
+    test_admin_username: str | None = None
+    test_admin_password: str | None = None
+
     model_config = {"env_file": ".env"}
 
 
