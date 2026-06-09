@@ -1,0 +1,25 @@
+services:
+  admin:
+    build: ./admin
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./admin/.env
+    volumes:
+      - ./admin/.env:/app/.env          # writable so update_password_hash() persists
+      - admin_db:/app/data              # SQLite persistence; remove if using SQLiteCloud
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+      args:
+        NEXT_PUBLIC_API_URL: https://api.yourdomain.com   # ← replace with your real API domain
+    ports:
+      - "3000:3000"
+    depends_on:
+      - admin
+    restart: unless-stopped
+
+volumes:
+  admin_db:
