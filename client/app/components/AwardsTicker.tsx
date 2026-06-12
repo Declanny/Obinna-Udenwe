@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { slugify } from "../lib/api";
 import { Prize } from "../lib/fallback";
 
 export function AwardsTicker({ prizes }: { prizes: Prize[] }) {
@@ -116,6 +118,16 @@ export function AwardsTicker({ prizes }: { prizes: Prize[] }) {
                   </ul>
                 </div>
               ) : null}
+
+              <div className="border-t border-dark-green/10 mt-6 pt-5">
+                <Link
+                  href={`/prizes/${slugify(selected.label)}`}
+                  onClick={() => setSelected(null)}
+                  className="inline-block bg-dark-green text-white text-xs font-semibold uppercase tracking-widest px-5 py-3 rounded-sm hover:bg-dark-green/90 transition-colors"
+                >
+                  View Prize Detail →
+                </Link>
+              </div>
             </div>
           </div>
         </div>

@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 import { blogsApi, booksApi, slugify, storiesApi } from "./lib/api";
-import { FALLBACK_BLOGS, FALLBACK_BOOKS, FALLBACK_STORIES } from "./lib/fallback";
+import {
+  FALLBACK_BLOGS,
+  FALLBACK_BOOKS,
+  FALLBACK_PRIZES,
+  FALLBACK_STORIES,
+} from "./lib/fallback";
 import { SITE_URL } from "./lib/seo";
 
 async function safeList<T>(fetcher: () => Promise<T[]>, fallback: T[]): Promise<T[]> {
@@ -59,6 +64,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${SITE_URL}/prizes`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: `${SITE_URL}/contact`,
       lastModified: now,
       changeFrequency: "yearly",
@@ -93,5 +104,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-  return [...staticRoutes, ...bookRoutes, ...blogRoutes, ...storyRoutes];
+  const prizeRoutes: MetadataRoute.Sitemap = FALLBACK_PRIZES.map((p) => ({
+    url: `${SITE_URL}/prizes/${slugify(p.label)}`,
+    lastModified: now,
+    changeFrequency: "yearly",
+    priority: 0.6,
+  }));
+
+  return [
+    ...staticRoutes,
+    ...bookRoutes,
+    ...blogRoutes,
+    ...storyRoutes,
+    ...prizeRoutes,
+  ];
 }
