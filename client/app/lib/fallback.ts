@@ -9,6 +9,68 @@ import {
   Story,
 } from "./api";
 
+export type Prize = {
+  label: string;
+  title: string;
+  year?: number;
+  work?: string;
+  items?: string[];
+  detail: string;
+};
+
+export const FALLBACK_PRIZES: Prize[] = [
+  {
+    label: "Chinua Achebe Prize 2021",
+    title: "The Chinua Achebe Prize for Literature",
+    year: 2021,
+    work: "Colours of Hatred",
+    items: [
+      "Inaugural edition of the prize",
+      "Cited by the judges as a masterpiece of contemporary African literature",
+      "Award ceremony held in Lagos, Nigeria",
+    ],
+    detail:
+      "Udenwe won the inaugural edition of The Chinua Achebe Prize for Literature for his novel Colours of Hatred. The judging panel cited the novel as a masterpiece of contemporary African literature during the ceremony in Lagos. The prize is awarded annually to a single work that reshapes the imaginative terrain of the continent, and is named in honour of the late Chinua Achebe.",
+  },
+  {
+    label: "ANA Prize 2019",
+    title: "ANA Prize for Prose Fiction",
+    year: 2019,
+    work: "Satans & Shaitans",
+    items: [
+      "Awarded by the Association of Nigerian Authors",
+      "Recognized in the prose fiction category",
+    ],
+    detail:
+      "Satans & Shaitans, Udenwe's explosive debut set against the backdrop of Nigeria's terrorism tension, won the ANA Prize for Prose Fiction. The novel follows five shadowy cartels, bound by blood pacts and hungry for control, as they unleash a chain of assassinations that reach into the highest offices of the land.",
+  },
+  {
+    label: "Prairie Schooner Prize 2020",
+    title: "Prairie Schooner — Glenna Luschei Prize",
+    year: 2020,
+    work: "Prairie Schooner Prize Story",
+    items: [
+      "Awarded by the University of Nebraska Press",
+      "Recognizes outstanding work published in Prairie Schooner magazine",
+      "Also shortlisted for the Prairie Schooner — Raz Shumaker Book Prize",
+    ],
+    detail:
+      "Udenwe was awarded the Prairie Schooner — Glenna Luschei Prize of the University of Nebraska Press in 2020 for his short fiction. He was also a finalist for the Prairie Schooner — Raz Shumaker Book Prize the same year, marking a defining international moment for his short-story work.",
+  },
+  {
+    label: "NLNG Finalist",
+    title: "The NLNG Nigeria Prize for Literature",
+    year: 2023,
+    work: "Colours of Hatred",
+    items: [
+      "Shortlisted in 2023",
+      "One of the most prestigious literary prizes on the African continent",
+    ],
+    detail:
+      "Colours of Hatred was a finalist for The NLNG Nigeria Prize for Literature, widely regarded as one of the most prestigious literary awards on the African continent. The shortlist recognition followed the novel's win at the Chinua Achebe Prize the year prior.",
+  },
+];
+
 export const FALLBACK_SITE: SiteContent = {
   id: 0,
   hero_kicker: "Novelist. Story-teller. Civil engineer.",

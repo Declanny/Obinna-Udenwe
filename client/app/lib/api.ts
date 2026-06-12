@@ -183,6 +183,13 @@ export async function confirmChangePassword(input: {
 
 // ---------------- Fetch helper ----------------
 
+function hasAuthHeader(headers: HeadersInit | undefined): boolean {
+  if (!headers) return false;
+  if (headers instanceof Headers) return headers.has("Authorization");
+  if (Array.isArray(headers)) return headers.some(([k]) => k.toLowerCase() === "authorization");
+  return Object.keys(headers).some((k) => k.toLowerCase() === "authorization");
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const method = (init.method ?? "GET").toUpperCase();
   const isRead = method === "GET";
@@ -196,6 +203,15 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   const res = await fetch(`${API_BASE}${path}`, { ...defaults, ...init });
   if (!res.ok) {
+    // The token we held was rejected (expired, key-rotated, or username changed
+    // server-side). Drop it and bounce to login so the user can re-authenticate
+    // instead of seeing a cryptic 401 in a modal.
+    if (res.status === 401 && hasAuthHeader(init.headers) && typeof window !== "undefined") {
+      clearToken();
+      if (!window.location.pathname.startsWith("/admin/login")) {
+        window.location.assign("/admin/login");
+      }
+    }
     const detail = await res.text().catch(() => "");
     throw new Error(`${res.status} ${res.statusText}: ${detail}`);
   }

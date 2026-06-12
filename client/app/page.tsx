@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
+import { AwardsTicker } from "./components/AwardsTicker";
 import { QuoteAndNewsletter } from "./components/QuoteAndNewsletter";
 import { jsonLdScript, personSchema, websiteSchema } from "./lib/seo";
 import {
@@ -19,6 +20,7 @@ import {
   FALLBACK_BLOGS,
   FALLBACK_BOOKS,
   FALLBACK_GALLERY,
+  FALLBACK_PRIZES,
   FALLBACK_SITE,
 } from "./lib/fallback";
 
@@ -86,31 +88,6 @@ function HeroSection({ site }: { site: SiteContent | null }) {
         </div>
       </div>
     </section>
-  );
-}
-
-function AwardsTicker({ awards }: { awards: string[] }) {
-  const items = awards.length > 0 ? awards : FALLBACK_SITE.awards;
-  return (
-    <div
-      className="bg-white"
-      style={{
-        borderTop: "1px solid #C2C8C11A",
-        borderBottom: "1px solid #C2C8C11A",
-      }}
-    >
-      <div className="px-6 md:px-8 lg:px-16 py-8 md:py-12 grid grid-cols-2 md:flex md:items-center md:justify-between gap-x-6 gap-y-5">
-        {items.map((award, i) => (
-          <span
-            key={i}
-            className="font-sans font-bold text-[11px] md:text-xs uppercase text-black pb-1 text-center md:text-left"
-            style={{ letterSpacing: "2.4px", lineHeight: "16px", borderBottom: "2px solid #C8922A" }}
-          >
-            {award}
-          </span>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -309,7 +286,7 @@ export default async function Home() {
       />
       <Navbar />
       <HeroSection site={site} />
-      <AwardsTicker awards={site?.awards ?? []} />
+      <AwardsTicker prizes={FALLBACK_PRIZES} />
       <div className="relative">
         <FeaturedBook site={site} />
         <BooksSection books={books} />
