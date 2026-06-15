@@ -197,28 +197,39 @@ function GallerySection({ gallery }: { gallery: GalleryItemApi[] }) {
   return (
     <section className="bg-cream">
       <div className="px-6 md:px-8 lg:px-16 pt-6 md:pt-8 lg:pt-12 pb-0">
-        <p className="text-gold text-xs uppercase tracking-widest font-semibold mb-2">
-          Where the Story Began
-        </p>
-        <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-dark-green mb-8 md:mb-10">
-          Literary and atmospheric
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 md:mb-10">
+          <div>
+            <p className="text-gold text-xs uppercase tracking-widest font-semibold mb-2">
+              Where the Story Began
+            </p>
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-dark-green">
+              Literary and atmospheric
+            </h2>
+          </div>
+          <Link
+            href="/gallery"
+            className="text-xs font-semibold uppercase tracking-widest text-dark-green hover:text-gold transition-colors"
+          >
+            View All →
+          </Link>
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {items.map((photo) => (
-            <div
+            <Link
+              href="/gallery"
               key={photo.id}
-              className="aspect-4/3 relative overflow-hidden rounded-sm bg-dark-green/10"
+              className="group aspect-4/3 relative overflow-hidden rounded-sm bg-dark-green/10 block"
             >
               {photo.image ? (
                 <Image
                   src={photo.image}
                   alt={photo.title}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
                   unoptimized
                 />
               ) : null}
-            </div>
+            </Link>
           ))}
         </div>
       </div>
