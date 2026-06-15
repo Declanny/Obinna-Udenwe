@@ -34,8 +34,7 @@ export function QuoteAndNewsletter() {
         <div className="flex-1">
           <span className="text-gold text-4xl leading-none">&ldquo;</span>
           <blockquote className="font-serif text-xl md:text-2xl lg:text-3xl italic leading-relaxed mt-2">
-            Literature is the only tool we have to interrogate the silence of
-            history.
+            The line between fiction and reality is very thin.
           </blockquote>
           <p className="text-gold text-xs uppercase tracking-widest font-semibold mt-6">
             Obinna Udenwe

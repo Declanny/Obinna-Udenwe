@@ -74,14 +74,15 @@ function AboutHero() {
 
 function HonorsSection() {
   const honors = [
-    { year: "2023", title: "The NLNG Prize for Literature", note: "Shortlist" },
-    { year: "2018", title: "ANA Prose Prize", note: "Winner" },
-    { year: "2016", title: "The African Writers' Prize", note: "Winner" },
-    {
-      year: "2014",
-      title: "The Caine Prize for African Writing",
-      note: "Shortlist",
-    },
+    { year: "2024", title: "Legacy FM Literary Excellence Award", note: "Winner" },
+    { year: "2021", title: "The NLNG Nigeria Prize for Literature", note: "Shortlist" },
+    { year: "2021", title: "The Chinua Achebe Prize for Literature", note: "Winner" },
+    { year: "2020", title: "The Prairie Schooner-Glenna Luschei Prize", note: "Winner" },
+    { year: "2020", title: "The Prairie Schooner-Raz Shumaker Book Prize", note: "Finalist" },
+    { year: "2016", title: "The Short Story is Dead Prize", note: "Winner" },
+    { year: "2015", title: "ANA Prize for Prose Fiction", note: "Winner" },
+    { year: "2014", title: "Ebonyi State Literary Icon Award", note: "Winner" },
+    { year: "2009", title: "National Top12 Honours Award", note: "Winner" },
   ];
 
   return (

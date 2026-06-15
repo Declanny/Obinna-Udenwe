@@ -1,12 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { slugify } from "../lib/api";
 import { Prize } from "../lib/fallback";
 
+const MOBILE_VISIBLE_THRESHOLD = 2;
+const DESKTOP_VISIBLE_THRESHOLD = 4;
+const MOBILE_SCROLL_SPEED_PX_PER_MS = 0.04;
+const MOBILE_RESUME_DELAY_MS = 2000;
+
 export function AwardsTicker({ prizes }: { prizes: Prize[] }) {
   const [selected, setSelected] = useState<Prize | null>(null);
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!selected) return;
@@ -22,6 +28,78 @@ export function AwardsTicker({ prizes }: { prizes: Prize[] }) {
     };
   }, [selected]);
 
+  const needsMobileScroll = prizes.length > MOBILE_VISIBLE_THRESHOLD;
+  const needsDesktopScroll = prizes.length > DESKTOP_VISIBLE_THRESHOLD;
+
+  useEffect(() => {
+    if (!needsMobileScroll) return;
+    const el = mobileScrollRef.current;
+    if (!el) return;
+
+    let raf = 0;
+    let lastTime = 0;
+    let paused = false;
+    let resumeTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const tick = (time: number) => {
+      if (!paused && lastTime) {
+        const dt = time - lastTime;
+        el.scrollLeft += dt * MOBILE_SCROLL_SPEED_PX_PER_MS;
+        const half = el.scrollWidth / 2;
+        if (half > 0 && el.scrollLeft >= half) {
+          el.scrollLeft -= half;
+        }
+      }
+      lastTime = time;
+      raf = requestAnimationFrame(tick);
+    };
+
+    const pause = () => {
+      paused = true;
+      if (resumeTimer) {
+        clearTimeout(resumeTimer);
+        resumeTimer = null;
+      }
+    };
+    const scheduleResume = () => {
+      if (resumeTimer) clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => {
+        paused = false;
+        lastTime = 0;
+      }, MOBILE_RESUME_DELAY_MS);
+    };
+
+    el.addEventListener("touchstart", pause, { passive: true });
+    el.addEventListener("touchend", scheduleResume, { passive: true });
+    el.addEventListener("touchcancel", scheduleResume, { passive: true });
+
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      if (resumeTimer) clearTimeout(resumeTimer);
+      el.removeEventListener("touchstart", pause);
+      el.removeEventListener("touchend", scheduleResume);
+      el.removeEventListener("touchcancel", scheduleResume);
+    };
+  }, [needsMobileScroll, prizes.length]);
+
+  const renderButton = (prize: Prize, key: string) => (
+    <button
+      key={key}
+      type="button"
+      onClick={() => setSelected(prize)}
+      className="font-sans font-bold text-[11px] md:text-xs uppercase text-black pb-1 text-center hover:text-gold focus-visible:text-gold transition-colors cursor-pointer outline-none whitespace-nowrap shrink-0"
+      style={{
+        letterSpacing: "2.4px",
+        lineHeight: "16px",
+        borderBottom: "2px solid #C8922A",
+      }}
+    >
+      {prize.label}
+    </button>
+  );
+
   return (
     <>
       <div
@@ -31,22 +109,37 @@ export function AwardsTicker({ prizes }: { prizes: Prize[] }) {
           borderBottom: "1px solid #C2C8C11A",
         }}
       >
-        <div className="px-6 md:px-8 lg:px-16 py-8 md:py-12 grid grid-cols-2 md:flex md:items-center md:justify-between gap-x-6 gap-y-5">
-          {prizes.map((prize) => (
-            <button
-              key={prize.label}
-              type="button"
-              onClick={() => setSelected(prize)}
-              className="font-sans font-bold text-[11px] md:text-xs uppercase text-black pb-1 text-center md:text-left hover:text-gold focus-visible:text-gold transition-colors cursor-pointer outline-none"
-              style={{
-                letterSpacing: "2.4px",
-                lineHeight: "16px",
-                borderBottom: "2px solid #C8922A",
-              }}
+        <div className="md:hidden py-8">
+          {needsMobileScroll ? (
+            <div
+              ref={mobileScrollRef}
+              className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              {prize.label}
-            </button>
-          ))}
+              <div className="flex w-max gap-x-8 px-6">
+                {prizes.map((prize) => renderButton(prize, `m-a-${prize.label}`))}
+                {prizes.map((prize) => renderButton(prize, `m-b-${prize.label}`))}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-x-6 gap-y-5 px-6">
+              {prizes.map((prize) => renderButton(prize, prize.label))}
+            </div>
+          )}
+        </div>
+
+        <div className="hidden md:block px-8 lg:px-16 py-12">
+          {needsDesktopScroll ? (
+            <div className="overflow-hidden group">
+              <div className="flex w-max gap-x-12 animate-marquee group-hover:[animation-play-state:paused]">
+                {prizes.map((prize) => renderButton(prize, `d-a-${prize.label}`))}
+                {prizes.map((prize) => renderButton(prize, `d-b-${prize.label}`))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-x-6">
+              {prizes.map((prize) => renderButton(prize, prize.label))}
+            </div>
+          )}
         </div>
       </div>
 
